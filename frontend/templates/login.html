@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase & Flask Login</title>
+    <!-- Use the Tailwind CSS CDN for easy styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Login</h1>
+        
+        <!-- The form no longer submits directly to the backend. The JavaScript handles it. -->
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label for="email" class="block text-gray-700 font-medium mb-1">Email</label>
+                <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200" required>
+            </div>
+            <div>
+                <label for="password" class="block text-gray-700 font-medium mb-1">Password</label>
+                <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Log In
+            </button>
+        </form>
+        <div id="message" class="mt-4 text-center font-medium"></div>
+        <div class="mt-6 text-center text-sm text-gray-600">
+            Don't have an account? 
+            <a href="/register" class="font-medium text-indigo-600 hover:text-indigo-500">
+                Sign in now
+            </a>
+        </div>
+    </div>
+
+    <!-- The core Firebase SDK is now loaded with the modern, modular approach -->
+    <script type="module">
+        // Import Firebase services from the modern SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+
+        // IMPORTANT: Replace with your actual Firebase project config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTP7qat-ahJFilwwDjJ-d07AtARFszRx8",
+            authDomain: "virtual-stylist-52782.firebaseapp.com",
+            projectId: "virtual-stylist-52782",
+            storageBucket: "virtual-stylist-52782.firebasestorage.app",
+            messagingSenderId: "551787433555",
+            appId: "1:551787433555:web:29618a612ad195565900a6"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const loginForm = document.getElementById('loginForm');
+        const messageDiv = document.getElementById('message');
+        
+        // This script now handles the client-side login with Firebase and token submission to Flask.
+        loginForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const email = loginForm.email.value;
+            const password = loginForm.password.value;
+            
+            messageDiv.textContent = 'Logging in...';
+            messageDiv.className = 'mt-4 text-center font-medium text-gray-500';
+
+            try {
+                // Sign in the user with Firebase Authentication. This validates the password securely.
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Get the ID token to send to the Flask backend for verification
+                const idToken = await user.getIdToken();
+
+                // Send the ID token to your Flask backend
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({ id_token: idToken }).toString(),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    messageDiv.textContent = result.message;
+                    messageDiv.className = 'mt-4 text-center font-medium text-green-600';
+                    // Redirect to the dashboard on successful login
+                    window.location.href = '/';
+                } else {
+                    // Handle Flask backend errors
+                    messageDiv.textContent = result.message || 'Authentication failed.';
+                    messageDiv.className = 'mt-4 text-center font-medium text-red-600';
+                }
+
+            } catch (error) {
+                console.error('Firebase login error:', error);
+                // Handle Firebase-specific errors (e.g., wrong password, user not found)
+                messageDiv.textContent = 'Login failed: ' + error.message;
+                messageDiv.className = 'mt-4 text-center font-medium text-red-600';
+            }
+        });
+    </script>
+</body>
+</html>

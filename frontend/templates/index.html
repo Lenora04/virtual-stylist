@@ -1,0 +1,148 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Stylist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto p-4 md:p-8">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8 bg-white p-4 rounded-xl shadow-md">
+            <h1 class="text-2xl font-bold text-gray-900">Virtual Stylist</h1>
+            <a href="/logout" class="text-sm font-medium text-red-600 hover:text-red-500">Log Out</a>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Panel: Closet Management -->
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Your Closet</h2>
+                <form id="addItemForm" class="flex mb-4">
+                    <input type="text" id="itemInput" name="itemInput" placeholder="Add new item (e.g., 'blue jeans', 'white t-shirt')" required
+                           class="flex-grow rounded-l-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700">Add</button>
+                </form>
+                
+                <ul id="closetList" class="divide-y divide-gray-200">
+                    {% for item in closet %}
+                        <li class="py-2 text-gray-700">{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Right Panel: Outfit Generator -->
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Get an Outfit Recommendation</h2>
+                <form id="generateOutfitForm" class="space-y-4">
+                    <div>
+                        <label for="occasion" class="block text-sm font-medium text-gray-700">Occasion</label>
+                        <input type="text" id="occasion" name="occasion" placeholder="e.g., 'work meeting', 'casual dinner'" required
+                               class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                    </div>
+                    <div>
+                        <label for="style_preference" class="block text-sm font-medium text-gray-700">Style Preference</label>
+                        <input type="text" id="style_preference" name="style_preference" placeholder="e.g., 'formal', 'bohemian', 'streetwear'" required
+                               class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                    </div>
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        Generate Outfit
+                    </button>
+                </form>
+
+                <div class="mt-8 p-4 bg-gray-50 rounded-lg shadow-inner">
+                    <h3 class="text-lg font-semibold text-gray-800">Recommendation</h3>
+                    <div id="recommendationResult" class="mt-2 text-gray-600">
+                        Enter your preferences and click "Generate Outfit" to see a recommendation here.
+                    </div>
+                    <div id="loading" class="mt-2 hidden text-center text-sm text-indigo-500">
+                        <p>Generating your outfit... this may take a moment.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Handle adding a new item to the closet
+        document.getElementById('addItemForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            const itemInput = document.getElementById('itemInput');
+            const itemValue = itemInput.value.trim();
+
+            if (itemValue === '') {
+            // You can add user feedback here, like a temporary error message
+                console.error('Item field cannot be empty.');
+                return; // Stop the function from executing further
+            }
+
+            const closetList = document.getElementById('closetList');
+            
+            const response = await fetch('/add-item', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            if (response.ok) {
+                const li = document.createElement('li');
+                li.className = 'py-2 text-gray-700';
+                li.textContent = result.item;
+                closetList.appendChild(li);
+                itemInput.value = ''; // Clear the input field
+            }else{
+                console.error(result.message);
+            }
+        });
+
+        // Handle generating an outfit recommendation
+        document.getElementById('generateOutfitForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const recommendationResultDiv = document.getElementById('recommendationResult');
+            const loadingDiv = document.getElementById('loading');
+
+            recommendationResultDiv.innerHTML = '';
+            loadingDiv.classList.remove('hidden');
+
+            const response = await fetch('/generate-outfit', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            
+            loadingDiv.classList.add('hidden');
+            if (response.ok) {
+                // Display the text recommendation
+                const textParagraph = document.createElement('p');
+                textParagraph.textContent = result.recommendation;
+                textParagraph.className = "mb-4";
+                recommendationResultDiv.appendChild(textParagraph);
+
+                // Display the generated image
+                if (result.image_url) {
+                    const imageElement = document.createElement('img');
+                    imageElement.src = result.image_url;
+                    imageElement.alt = "Generated outfit recommendation";
+                    imageElement.className = "w-full h-auto rounded-lg shadow-md";
+                    recommendationResultDiv.appendChild(imageElement);
+                }
+            } else {
+                recommendationResultDiv.textContent = result.message;
+            }
+        });
+    </script>
+</body>
+</html>
