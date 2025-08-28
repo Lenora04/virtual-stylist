@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase & Flask Register</title>
-    <!-- Use the Tailwind CSS CDN for easy styling -->
+    <title>Virtual Stylist - Register</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,99 +11,115 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #1a202c; /* Dark background */
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Create an Account</h1>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen text-white">
+    <div class="bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-sm border border-gray-700">
+        <h1 class="text-3xl font-bold text-center text-gray-100 mb-6">Create an Account</h1>
         
         <form id="registerForm" class="space-y-4">
             <div>
-                <label for="email" class="block text-gray-700 font-medium mb-1">Email</label>
-                <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200" required>
+                <label for="email" class="block text-gray-300 font-medium mb-1">Email</label>
+                <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-600 rounded-md bg-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200" required>
             </div>
             <div>
-                <label for="password" class="block text-gray-700 font-medium mb-1">Password</label>
-                <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200" required>
+                <label for="password" class="block text-gray-300 font-medium mb-1">Password</label>
+                <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-600 rounded-md bg-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200" required>
             </div>
             <div>
-                <label for="confirm-password" class="block text-gray-700 font-medium mb-1">Confirm Password</label>
-                <input type="password" id="confirm-password" name="confirm-password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200" required>
+                <label for="confirm-password" class="block text-gray-300 font-medium mb-1">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm-password" class="w-full px-4 py-2 border border-gray-600 rounded-md bg-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200" required>
             </div>
-            <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            <button type="submit" class="w-full bg-purple-600 text-white font-semibold py-2 rounded-md hover:bg-purple-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transform hover:scale-105">
                 Register
             </button>
         </form>
         <div id="message" class="mt-4 text-center font-medium"></div>
-        <div class="mt-6 text-center text-sm text-gray-600">
+        <div class="mt-6 text-center text-sm text-gray-400">
             Already have an account? 
-            <a href="/login" class="font-medium text-indigo-600 hover:text-indigo-500">
+            <a href="/login" class="font-medium text-purple-400 hover:text-purple-300">
                 Log In
             </a>
         </div>
     </div>
 
-    <!-- The core Firebase SDK is now loaded with the modern, modular approach -->
     <script type="module">
-        // Import Firebase services from the modern SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 
-        // IMPORTANT: Replace with your actual Firebase project config
-         const firebaseConfig = {
-            apiKey: "AIzaSyCTP7qat-ahJFilwwDjJ-d07AtARFszRx8",
-            authDomain: "virtual-stylist-52782.firebaseapp.com",
-            projectId: "virtual-stylist-52782",
-            storageBucket: "virtual-stylist-52782.firebasestorage.app",
-            messagingSenderId: "551787433555",
-            appId: "1:551787433555:web:29618a612ad195565900a6"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        const registerForm = document.getElementById('registerForm');
-        const messageDiv = document.getElementById('message');
+        // Function to fetch Firebase config from the backend
+        async function fetchFirebaseConfig() {
+            try {
+                const response = await fetch('/firebase-config');
+                const config = await response.json();
+                return config;
+            } catch (error) {
+                console.error("Failed to fetch Firebase config:", error);
+                return null;
+            }
+        }
         
-        // This script handles the client-side user registration with Firebase.
-        registerForm.addEventListener('submit', async function(event) {
-            event.preventDefault(); // Prevent default form submission
-
-            const email = registerForm.email.value;
-            const password = registerForm.password.value;
-            const confirmPassword = registerForm.elements['confirm-password'].value;
-            
-            messageDiv.textContent = 'Registering...';
-            messageDiv.className = 'mt-4 text-center font-medium text-gray-500';
-
-            if (password !== confirmPassword) {
-                messageDiv.textContent = 'Passwords do not match.';
-                messageDiv.className = 'mt-4 text-center font-medium text-red-600';
+        async function initApp() {
+            const firebaseConfig = await fetchFirebaseConfig();
+            if (!firebaseConfig) {
+                const messageDiv = document.getElementById('message');
+                messageDiv.textContent = 'Failed to load app configuration. Please try again later.';
+                messageDiv.className = 'mt-4 text-center font-medium text-red-400';
                 return;
             }
+            
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const registerForm = document.getElementById('registerForm');
+            const messageDiv = document.getElementById('message');
 
-            try {
-                // Create a new user with Firebase Authentication.
-                await createUserWithEmailAndPassword(auth, email, password);
+            registerForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
 
-                messageDiv.textContent = 'Registration successful! You can now log in.';
-                messageDiv.className = 'mt-4 text-center font-medium text-green-600';
+                const email = registerForm.email.value;
+                const password = registerForm.password.value;
+                const confirmPassword = registerForm.elements['confirm-password'].value;
+                
+                messageDiv.textContent = 'Registering...';
+                messageDiv.className = 'mt-4 text-center font-medium text-gray-400';
 
-                // Optional: Redirect to login page after a short delay
-                setTimeout(() => {
-                    window.location.href = '/login';
-                }, 2000);
+                if (password !== confirmPassword) {
+                    messageDiv.textContent = 'Passwords do not match.';
+                    messageDiv.className = 'mt-4 text-center font-medium text-red-400';
+                    return;
+                }
 
-            } catch (error) {
-                console.error('Firebase registration error:', error);
-                // Handle Firebase-specific errors (e.g., email already in use, weak password)
-                messageDiv.textContent = 'Registration failed: ' + error.message;
-                messageDiv.className = 'mt-4 text-center font-medium text-red-600';
-            }
-        });
+                try {
+                    await createUserWithEmailAndPassword(auth, email, password);
+
+                    messageDiv.textContent = 'Registration successful! Redirecting to login...';
+                    messageDiv.className = 'mt-4 text-center font-medium text-green-400';
+
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+
+                } catch (error) {
+                    console.error('Firebase registration error:', error);
+                    let displayMessage = 'Registration failed. Please try again.';
+                    if (error.code === 'auth/email-already-in-use') {
+                        displayMessage = 'This email is already in use. Please log in or use a different email.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        displayMessage = 'The email address is not valid.';
+                    } else if (error.code === 'auth/weak-password') {
+                        displayMessage = 'The password is too weak. Please use a stronger password.';
+                    } else if (error.code === 'auth/network-request-failed') {
+                        displayMessage = 'Network error. Please check your internet connection.';
+                    }
+                    messageDiv.textContent = displayMessage;
+                    messageDiv.className = 'mt-4 text-center font-medium text-red-400';
+                }
+            });
+        }
+        
+        initApp();
     </script>
 </body>
 </html>
