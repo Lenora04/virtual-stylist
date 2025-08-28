@@ -1,4 +1,3 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,140 +7,277 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Dark background */
+        }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto p-4 md:p-8">
-        <!-- Header -->
-        <header class="flex justify-between items-center mb-8 bg-white p-4 rounded-xl shadow-md">
-            <h1 class="text-2xl font-bold text-gray-900">Virtual Stylist</h1>
-            <a href="/logout" class="text-sm font-medium text-red-600 hover:text-red-500">Log Out</a>
-        </header>
+<body class="bg-gray-900 text-white min-h-screen p-4 sm:p-8">
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Left Panel: Closet Management -->
-            <div class="bg-white p-6 rounded-xl shadow-md">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Your Closet</h2>
-                <form id="addItemForm" class="flex mb-4">
-                    <input type="text" id="itemInput" name="itemInput" placeholder="Add new item (e.g., 'blue jeans', 'white t-shirt')" required
-                           class="flex-grow rounded-l-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700">Add</button>
-                </form>
-                
-                <ul id="closetList" class="divide-y divide-gray-200">
+    <header class="flex justify-between items-center mb-8 flex-wrap">
+        <h1 class="text-4xl font-bold text-purple-400">Virtual Stylist</h1>
+        <a href="/logout" class="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors duration-200">
+            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+        </a>
+    </header>
+
+    <main class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <section class="bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700">
+            <h2 class="text-2xl font-semibold text-gray-100 mb-4">Your Closet</h2>
+            
+            <form id="addItemForm" class="flex items-center space-x-2 mb-6">
+                <input type="text" id="itemInput" placeholder="Add an item (e.g., blue jeans)" class="flex-1 px-4 py-2 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200" required>
+                <button type="submit" class="bg-purple-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-purple-700 transition-colors duration-200">Add</button>
+            </form>
+
+            <ul id="closetList" class="space-y-3">
+                {% if closet %}
                     {% for item in closet %}
-                        <li class="py-2 text-gray-700">{{ item }}</li>
+                        <li class="bg-gray-700 p-3 rounded-lg flex justify-between items-center text-gray-200">
+                            <span>{{ item }}</span>
+                            <button class="delete-item-btn text-red-400 hover:text-red-500 transition-colors duration-200" data-item="{{ item }}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </li>
                     {% endfor %}
-                </ul>
-            </div>
+                {% else %}
+                    <li class="text-gray-400 text-center">Your closet is empty. Add some items to get started!</li>
+                {% endif %}
+            </ul>
+        </section>
 
-            <!-- Right Panel: Outfit Generator -->
-            <div class="bg-white p-6 rounded-xl shadow-md">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Get an Outfit Recommendation</h2>
-                <form id="generateOutfitForm" class="space-y-4">
-                    <div>
-                        <label for="occasion" class="block text-sm font-medium text-gray-700">Occasion</label>
-                        <input type="text" id="occasion" name="occasion" placeholder="e.g., 'work meeting', 'casual dinner'" required
-                               class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-                    </div>
-                    <div>
-                        <label for="style_preference" class="block text-sm font-medium text-gray-700">Style Preference</label>
-                        <input type="text" id="style_preference" name="style_preference" placeholder="e.g., 'formal', 'bohemian', 'streetwear'" required
-                               class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-                    </div>
-                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                        Generate Outfit
-                    </button>
-                </form>
-
-                <div class="mt-8 p-4 bg-gray-50 rounded-lg shadow-inner">
-                    <h3 class="text-lg font-semibold text-gray-800">Recommendation</h3>
-                    <div id="recommendationResult" class="mt-2 text-gray-600">
-                        Enter your preferences and click "Generate Outfit" to see a recommendation here.
-                    </div>
-                    <div id="loading" class="mt-2 hidden text-center text-sm text-indigo-500">
-                        <p>Generating your outfit... this may take a moment.</p>
+        <section class="bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700">
+            <h2 class="text-2xl font-semibold text-gray-100 mb-4">Get an Outfit</h2>
+            
+            <form id="generateOutfitForm" class="space-y-4">
+                <div>
+                    <label for="occasion" class="block text-gray-300 font-medium mb-1">Occasion</label>
+                    <input type="text" id="occasion" placeholder="e.g., a casual date" class="w-full px-4 py-2 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200">
+                </div>
+                <div>
+                    <label for="style" class="block text-gray-300 font-medium mb-1">Style Preference</label>
+                    <input type="text" id="style" placeholder="e.g., boho chic" class="w-full px-4 py-2 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200">
+                </div>
+                <div>
+                    <span class="block text-gray-300 font-medium mb-1">Recommendation Type</span>
+                    <div class="flex items-center space-x-4 mt-2">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="recommendation_type" value="closet" class="form-radio text-purple-600 h-4 w-4" checked>
+                            <span class="ml-2 text-gray-300">Based on my closet</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="recommendation_type" value="general" class="form-radio text-purple-600 h-4 w-4">
+                            <span class="ml-2 text-gray-300">General outfit idea</span>
+                        </label>
                     </div>
                 </div>
+                <div>
+                    <span class="block text-gray-300 font-medium mb-1">Gender for Model</span>
+                    <div class="flex items-center space-x-4 mt-2">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="gender" value="man" class="form-radio text-purple-600 h-4 w-4" checked>
+                            <span class="ml-2 text-gray-300">Male</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="gender" value="woman" class="form-radio text-purple-600 h-4 w-4">
+                            <span class="ml-2 text-gray-300">Female</span>
+                        </label>
+                    
+                    </div>
+                </div>
+                <div class="flex justify-center">
+                    <button type="submit" class="bg-green-600 text-white font-semibold py-2 px-8 rounded-md hover:bg-green-700 transition-colors duration-200 transform hover:scale-105">
+                        Generate Outfit
+                    </button>
+                </div>
+            </form>
+            
+            <div id="outputContainer" class="mt-6 hidden">
+                <div id="loadingIndicator" class="text-center">
+                    <i class="fas fa-spinner fa-spin text-4xl text-purple-500"></i>
+                    <p class="mt-2 text-gray-400">Generating outfit recommendation...</p>
+                </div>
+                <div id="outfitResult" class="hidden">
+                    <h3 class="text-xl font-semibold text-gray-100 mb-2">Outfit Recommendation:</h3>
+                    <p id="recommendationText" class="text-gray-300 mb-4"></p>
+                    <button id="tryAgainBtn" class="mt-4 bg-yellow-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-yellow-600 transition-colors duration-200">
+                        Try Again
+                    </button>
+                </div>
             </div>
-        </div>
-    </div>
+            <div id="errorMessage" class="mt-6 text-red-400 text-center font-medium hidden"></div>
+        </section>
+    </main>
 
     <script>
-        // Handle adding a new item to the closet
-        document.getElementById('addItemForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const form = event.target;
-            const formData = new FormData(form);
-
-            const itemInput = document.getElementById('itemInput');
-            const itemValue = itemInput.value.trim();
-
-            if (itemValue === '') {
-            // You can add user feedback here, like a temporary error message
-                console.error('Item field cannot be empty.');
-                return; // Stop the function from executing further
-            }
-
+        document.addEventListener('DOMContentLoaded', function() {
+            const addItemForm = document.getElementById('addItemForm');
+            const generateOutfitForm = document.getElementById('generateOutfitForm');
+            const tryAgainBtn = document.getElementById('tryAgainBtn');
             const closetList = document.getElementById('closetList');
-            
-            const response = await fetch('/add-item', {
-                method: 'POST',
-                body: formData
-            });
-            
-            const result = await response.json();
-            if (response.ok) {
-                const li = document.createElement('li');
-                li.className = 'py-2 text-gray-700';
-                li.textContent = result.item;
-                closetList.appendChild(li);
-                itemInput.value = ''; // Clear the input field
-            }else{
-                console.error(result.message);
+            const itemInput = document.getElementById('itemInput');
+            const outputContainer = document.getElementById('outputContainer');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const outfitResult = document.getElementById('outfitResult');
+            const recommendationText = document.getElementById('recommendationText');
+            const errorMessageDiv = document.getElementById('errorMessage');
+
+            // Variable to store the last generated recommendation
+            let lastRecommendation = '';
+
+            // Function to display messages
+            function showMessage(message, isError = false) {
+                errorMessageDiv.textContent = message;
+                errorMessageDiv.classList.toggle('hidden', !message);
+                errorMessageDiv.classList.toggle('text-red-400', isError);
+                errorMessageDiv.classList.toggle('text-green-400', !isError);
             }
-        });
 
-        // Handle generating an outfit recommendation
-        document.getElementById('generateOutfitForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const form = event.target;
-            const formData = new FormData(form);
-            const recommendationResultDiv = document.getElementById('recommendationResult');
-            const loadingDiv = document.getElementById('loading');
-
-            recommendationResultDiv.innerHTML = '';
-            loadingDiv.classList.remove('hidden');
-
-            const response = await fetch('/generate-outfit', {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await response.json();
-            
-            loadingDiv.classList.add('hidden');
-            if (response.ok) {
-                // Display the text recommendation
-                const textParagraph = document.createElement('p');
-                textParagraph.textContent = result.recommendation;
-                textParagraph.className = "mb-4";
-                recommendationResultDiv.appendChild(textParagraph);
-
-                // Display the generated image
-                if (result.image_url) {
-                    const imageElement = document.createElement('img');
-                    imageElement.src = result.image_url;
-                    imageElement.alt = "Generated outfit recommendation";
-                    imageElement.className = "w-full h-auto rounded-lg shadow-md";
-                    recommendationResultDiv.appendChild(imageElement);
+            // Function to handle adding an item
+            addItemForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                const item = itemInput.value.trim();
+                if (!item) {
+                    showMessage('Please enter an item to add.', true);
+                    return;
                 }
-            } else {
-                recommendationResultDiv.textContent = result.message;
+
+                try {
+                    const formData = new FormData();
+                    formData.append('itemInput', item);
+                    const response = await fetch('/add-item', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        showMessage(result.message);
+                        // Clear the input field
+                        itemInput.value = '';
+                        // Add the new item to the list on the frontend
+                        const newItemLi = document.createElement('li');
+                        newItemLi.className = 'bg-gray-700 p-3 rounded-lg flex justify-between items-center text-gray-200';
+                        newItemLi.innerHTML = `
+                            <span>${result.item}</span>
+                            <button class="delete-item-btn text-red-400 hover:text-red-500 transition-colors duration-200" data-item="${result.item}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        `;
+                        closetList.prepend(newItemLi);
+                        // Remove the "empty closet" message if it exists
+                        const emptyMessage = document.querySelector('#closetList > li.text-gray-400');
+                        if (emptyMessage) {
+                            emptyMessage.remove();
+                        }
+                    } else {
+                        showMessage(result.message, true);
+                    }
+                } catch (error) {
+                    console.error('Error adding item:', error);
+                    showMessage('Failed to add item due to a network error.', true);
+                }
+            });
+
+            // Function to handle deleting an item
+            closetList.addEventListener('click', async function(event) {
+                if (event.target.closest('.delete-item-btn')) {
+                    const button = event.target.closest('.delete-item-btn');
+                    const itemToDelete = button.dataset.item;
+                    
+                    try {
+                        const formData = new FormData();
+                        formData.append('item', itemToDelete);
+                        const response = await fetch('/delete-item', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            showMessage(result.message);
+                            // Remove the item from the UI
+                            button.closest('li').remove();
+                            // If the list is empty, show the empty message
+                            if (closetList.children.length === 0) {
+                                const emptyMessage = document.createElement('li');
+                                emptyMessage.className = 'text-gray-400 text-center';
+                                emptyMessage.textContent = 'Your closet is empty. Add some items to get started!';
+                                closetList.appendChild(emptyMessage);
+                            }
+                        } else {
+                            showMessage(result.message, true);
+                        }
+                    } catch (error) {
+                        console.error('Error deleting item:', error);
+                        showMessage('Failed to delete item due to a network error.', true);
+                    }
+                }
+            });
+
+            // Function to handle generating an outfit
+            async function generateOutfit(dislikedOutfit = null) {
+                // Show loading state
+                outfitResult.classList.add('hidden');
+                outputContainer.classList.remove('hidden');
+                loadingIndicator.classList.remove('hidden');
+                showMessage('');
+
+                const occasion = document.getElementById('occasion').value;
+                const style_preference = document.getElementById('style').value;
+                const gender = document.querySelector('input[name="gender"]:checked').value;
+                const recommendation_type = document.querySelector('input[name="recommendation_type"]:checked').value;
+
+                try {
+                    const formData = new FormData();
+                    formData.append('occasion', occasion);
+                    formData.append('style_preference', style_preference);
+                    formData.append('gender', gender);
+                    formData.append('recommendation_type', recommendation_type);
+                    if (dislikedOutfit) {
+                        formData.append('disliked_outfit', dislikedOutfit);
+                    }
+                    
+                    const response = await fetch('/generate-outfit', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+
+                    loadingIndicator.classList.add('hidden');
+                    
+                    if (response.ok) {
+                        recommendationText.textContent = result.recommendation;
+                        lastRecommendation = result.recommendation; // Store the recommendation
+                        outfitResult.classList.remove('hidden');
+                    } else {
+                        showMessage(result.message, true);
+                    }
+                } catch (error) {
+                    loadingIndicator.classList.add('hidden');
+                    console.error('Error generating outfit:', error);
+                    showMessage('Failed to generate an outfit due to a network error. Please try again.', true);
+                }
             }
+
+            // Event listener for the main "Generate Outfit" button
+            generateOutfitForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                generateOutfit();
+            });
+
+            // Event listener for the new "Try Again" button
+            tryAgainBtn.addEventListener('click', function() {
+                if (lastRecommendation) {
+                    generateOutfit(lastRecommendation);
+                } else {
+                    showMessage('Please generate an initial outfit first.', true);
+                }
+            });
         });
     </script>
 </body>
