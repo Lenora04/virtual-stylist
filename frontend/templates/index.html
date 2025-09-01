@@ -88,10 +88,14 @@
                         </label>
                     
                     </div>
+                    
                 </div>
-                <div class="flex justify-center">
+                <div class="flex justify-center space-x-4">
                     <button type="submit" class="bg-green-600 text-white font-semibold py-2 px-8 rounded-md hover:bg-green-700 transition-colors duration-200 transform hover:scale-105">
                         Generate Outfit
+                    </button>
+                    <button type="button" id="trendyOutfitBtn" class="bg-pink-600 text-white font-semibold py-2 px-8 rounded-md hover:bg-pink-700 transition-colors duration-200 transform hover:scale-105">
+                        Trendy Outfit
                     </button>
                 </div>
             </form>
@@ -231,6 +235,8 @@
                 const style_preference = document.getElementById('style').value;
                 const gender = document.querySelector('input[name="gender"]:checked').value;
                 const recommendation_type = document.querySelector('input[name="recommendation_type"]:checked').value;
+                const include_trends = document.querySelector('input[name="include_trends"]').checked;
+
 
                 try {
                     const formData = new FormData();
@@ -238,6 +244,7 @@
                     formData.append('style_preference', style_preference);
                     formData.append('gender', gender);
                     formData.append('recommendation_type', recommendation_type);
+                    formData.append('include_trends', include_trends);
                     if (dislikedOutfit) {
                         formData.append('disliked_outfit', dislikedOutfit);
                     }
@@ -263,6 +270,55 @@
                     showMessage('Failed to generate an outfit due to a network error. Please try again.', true);
                 }
             }
+
+            // Add to your existing JavaScript
+const trendyOutfitBtn = document.getElementById('trendyOutfitBtn');
+
+trendyOutfitBtn.addEventListener('click', function() {
+    generateTrendyOutfit();
+});
+
+async function generateTrendyOutfit() {
+    // Show loading state
+    outfitResult.classList.add('hidden');
+    outputContainer.classList.remove('hidden');
+    loadingIndicator.classList.remove('hidden');
+    showMessage('');
+
+    const occasion = document.getElementById('occasion').value;
+    const style_preference = document.getElementById('style').value;
+    const gender = document.querySelector('input[name="gender"]:checked').value;
+
+    try {
+        const formData = new FormData();
+        formData.append('occasion', occasion);
+        formData.append('style_preference', style_preference);
+        formData.append('gender', gender);
+        
+        const response = await fetch('/get_trendy_outfit', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+
+        loadingIndicator.classList.add('hidden');
+        
+        if (response.ok) {
+            recommendationText.textContent = result.recommendation;
+            if (result.trends_considered && result.trends_considered.length > 0) {
+                recommendationText.textContent += `\n\n(Trends considered: ${result.trends_considered.join(', ')})`;
+            }
+            lastRecommendation = result.recommendation;
+            outfitResult.classList.remove('hidden');
+        } else {
+            showMessage(result.message, true);
+        }
+    } catch (error) {
+        loadingIndicator.classList.add('hidden');
+        console.error('Error generating trendy outfit:', error);
+        showMessage('Failed to generate a trendy outfit due to a network error. Please try again.', true);
+    }
+}
 
             // Event listener for the main "Generate Outfit" button
             generateOutfitForm.addEventListener('submit', function(event) {
