@@ -1,3 +1,6 @@
+# outfit_generator.py
+# This file contains the logic for generating outfit recommendations using the Gemini API.
+
 import os
 import time
 import requests
@@ -6,7 +9,7 @@ from agents.user_preference_agent import adjust_outfit_with_preferences  # integ
 
 # Load environment variables
 load_dotenv()
-GOOGLE_API_KEY = os.environ.get("GEMINI_API_KEY")
+GOOGLE_API_KEY = os.environ.get("GEMINI_API_KEY") 
 TREND_ANALYZER_URL = os.environ.get("TREND_ANALYZER_URL", "http://localhost:5000/analyze_trends")
 
 
@@ -72,17 +75,15 @@ def generate_outfit_recommendation(
     else:
         gender_term = "person's"
         gender_constraint = "Recommend a gender-neutral or appropriate outfit for a general person."
-    
+
     # Flag to track if we fell back to a general recommendation
     is_fallback = False
 
     # --- Build Gemini prompt (Initial Attempt: Closet) ---
     if recommendation_type == 'closet':
         if not user_closet:
-            # Case 1: Closet is completely empty.
             return "Your closet is empty. Please add some items first or switch to 'General outfit idea'!"
 
-        # Initial attempt to generate an outfit strictly from the closet
         gemini_prompt_closet = (
             f"You are a professional stylist. Recommend a stylish {gender_term} outfit strictly from this closet: "
             f"{', '.join(user_closet)}. "
@@ -91,8 +92,7 @@ def generate_outfit_recommendation(
         )
         if trends:
             gemini_prompt_closet += f" Consider these current fashion trends: {', '.join(trends)}."
-        
-        # Add the common parts
+
         common_prompt_suffix = " Recommend a single complete outfit."
         if disliked_outfit:
             common_prompt_suffix += (
@@ -100,23 +100,16 @@ def generate_outfit_recommendation(
                 f"Provide a new recommendation that does not include items from the disliked outfit."
             )
         common_prompt_suffix += " Explain why this outfit is recommended concisely."
-        
+
         gemini_prompt_closet += common_prompt_suffix
 
-        # Get initial outfit from Gemini
         recommendation_text = call_gemini_api(gemini_prompt_closet)
 
-        # Check if the closet items were insufficient (based on the instruction to the LLM)
         if "No suitable combination found in the closet" in recommendation_text or "No recommendation found" in recommendation_text:
-            # Case 2: Closet is not empty, but items are insufficient. Fallback to general.
             is_fallback = True
-            recommendation_type = 'general' # Change type for the next prompt
-            
-            # If we fall back, the general prompt is built and called below.
+            recommendation_type = 'general'
         else:
-            # Successful closet recommendation, skip to preference adjustment.
             pass
-
 
     # --- Build Gemini prompt (General Outfit Idea / Fallback) ---
     if recommendation_type == 'general' or is_fallback:
@@ -126,10 +119,9 @@ def generate_outfit_recommendation(
         )
         if trends:
             gemini_prompt += f" Consider these current fashion trends: {', '.join(trends)}."
-        
-        # Add the common parts
+
         gemini_prompt += " Please recommend a single, complete, and stylish outfit including one top and one bottom."
-        
+
         if disliked_outfit:
             gemini_prompt += (
                 f" The previous recommendation, '{disliked_outfit}', was not liked. "
@@ -137,10 +129,9 @@ def generate_outfit_recommendation(
             )
 
         gemini_prompt += " Explain why this outfit is recommended concisely."
-        
+
         recommendation_text = call_gemini_api(gemini_prompt)
-        
-        # Prepend the message about the fallback
+
         if is_fallback:
             recommendation_text = (
                 "I couldn't find a complete outfit for this occasion and style from your current closet items. "
@@ -150,7 +141,6 @@ def generate_outfit_recommendation(
     # --- Adjust with preferences ---
     if preferences:
         context = {"type": recommendation_type, "closet": user_closet if recommendation_type == 'closet' else []}
-        # Adjust the outfit based on the current recommendation (whether closet-based or general)
         adjusted = adjust_outfit_with_preferences(recommendation_text, preferences, context)
         final_outfit = adjusted["outfit"]
         reasons = adjusted["reasons"]
@@ -159,6 +149,5 @@ def generate_outfit_recommendation(
         if reasons:
             final_output += "\n\nPreference-based reasoning:\n" + "\n".join(reasons)
         return final_output
-    
-    
+
     return recommendation_text or "Could not generate a text recommendation. Please try again."
