@@ -16,7 +16,7 @@ from firebase_admin import credentials, auth
 from agents.OutfitGenerator import generate_outfit_recommendation
 #import other agents
 from agents.trendanalyzer import get_trend_agent, parse_trend_response
-from agents.product_search_agent import search_product_links
+#from agents.product_search_agent import search_product_links
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -180,12 +180,18 @@ def generate_outfit():
     gender = request.form.get('gender', 'person')
     disliked_outfit = request.form.get('disliked_outfit', None)
     recommendation_type = request.form.get('recommendation_type', 'closet')
-    include_trends = request.form.get('include_trends', 'false').lower() == 'true'
 
+    # First get current trends
+    try:
+        trend_response = analyze_trends_internal(f"{occasion} {style} fashion trends")
+        trends = trend_response.get('current_trends', [])[:3]  # Get top 3 trends
+    except:
+        trends = []
+    
     # Use the outfit generator to get a recommendation
     recommendation_text = generate_outfit_recommendation(
-        user_closet, occasion, style, gender, disliked_outfit, recommendation_type
-        recommendation_type, include_trends
+        user_closet, occasion, style, gender, disliked_outfit,
+        recommendation_type, trends
     )
     
     # Check if there was an error with the closet
@@ -195,6 +201,7 @@ def generate_outfit():
     # Return the recommendation to the frontend
     return jsonify({
         'recommendation': recommendation_text,
+        'trends_considered': trends
     }), 200
 
 
@@ -217,51 +224,11 @@ def analyze_trends():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/get_trendy_outfit', methods=['POST'])
-def get_trendy_outfit():
-    """Generates an outfit based on current trends"""
-    if 'uid' not in session:
-        return jsonify({'message': 'Unauthorized'}), 401
-
-    uid = session['uid']
-    user_ref = db.collection("closets").document(uid)
-    doc = user_ref.get()
-
-    user_closet = []
-    if doc.exists:
-        user_closet = doc.to_dict().get("items", [])
-
-    # Get parameters
-    occasion = request.form.get('occasion', '')
-    style = request.form.get('style_preference', '')
-    gender = request.form.get('gender', 'person')
-    
-    # First get current trends
-    try:
-        trend_response = analyze_trends_internal(f"{occasion} {style} fashion trends")
-        trends = trend_response.get('current_trends', [])[:3]  # Get top 3 trends
-    except:
-        trends = []
-    
-    # Generate outfit considering trends
-    recommendation_text = generate_outfit_recommendation(
-        user_closet, occasion, style, gender, 
-        disliked_outfit=None, 
-        recommendation_type='closet',
-        trends=trends
-    )
-    
-    return jsonify({
-        'recommendation': recommendation_text,
-        'trends_considered': trends
-    }), 200
-
 def analyze_trends_internal(query):
     """Internal function to analyze trends without HTTP request"""
     agent_executor = get_trend_agent()
     raw_response = agent_executor.invoke({"query": query})
     return parse_trend_response(raw_response).dict()
-
 
 
 @app.route('/logout')
