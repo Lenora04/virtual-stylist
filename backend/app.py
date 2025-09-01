@@ -4,9 +4,6 @@
 # and outfit generation via the Gemini API.
 
 import os
-import time
-import requests
-import json
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from dotenv import load_dotenv
 from firebase_admin import firestore
@@ -14,6 +11,12 @@ from firebase_admin import firestore
 # --- Firebase Imports and Configuration ---
 import firebase_admin
 from firebase_admin import credentials, auth
+
+# Import the outfit generator functions
+from agents.OutfitGenerator import generate_outfit_recommendation
+#import other agents
+from agents.trendanalyzer import get_trend_agent, parse_trend_response
+from agents.product_search_agent import search_product_links
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -33,65 +36,10 @@ except ValueError as e:
 db = firestore.client(app=app_firebase)
 
 # --- Configuration ---
-# You need to set your API keys as environment variables.
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
-
-# Set the template folder relative to the backend directory.
 template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'templates'))
 app = Flask(__name__, template_folder=template_dir)
 # Set a secret key for session management.
 app.secret_key = os.environ.get('FLASK_SECRET_KEY')
-
-
-# --- Helper Functions ---
-def call_gemini_api(prompt, model_name="gemini-1.5-flash-latest"):
-    """
-    Calls the Gemini API with exponential backoff for error handling.
-    """
-    api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent"
-    
-    # Simple exponential backoff retry logic
-    retries = 0
-    max_retries = 5
-    base_delay = 1.0  # seconds
-
-    while retries < max_retries:
-        try:
-            headers = {
-                "Content-Type": "application/json"
-            }
-            payload = {
-                "contents": [
-                    {
-                        "parts": [
-                            {"text": prompt}
-                        ]
-                    }
-                ],
-            }
-            
-            response = requests.post(
-                api_url, 
-                headers=headers, 
-                params={"key": GOOGLE_API_KEY},
-                json=payload
-            )
-            response.raise_for_status() # Raise an error for bad status codes
-
-            data = response.json()
-            if data and "candidates" in data and len(data["candidates"]) > 0:
-                return data["candidates"][0]["content"]["parts"][0]["text"]
-            else:
-                return "No recommendation found."
-
-        except requests.exceptions.RequestException as e:
-            print(f"API call failed: {e}")
-            retries += 1
-            delay = base_delay * (2 ** retries)
-            print(f"Retrying in {delay:.2f} seconds...")
-            time.sleep(delay)
-        
-    return "Failed to get a recommendation after several retries."
 
 
 # --- Routes ---
@@ -214,7 +162,7 @@ def delete_item():
 @app.route('/generate-outfit', methods=['POST'])
 def generate_outfit():
     """
-    Generates an outfit recommendation using the Gemini API.
+    Generates an outfit recommendation using the outfit generator.
     """
     if 'uid' not in session:
         return jsonify({'message': 'Unauthorized'}), 401
@@ -232,51 +180,89 @@ def generate_outfit():
     gender = request.form.get('gender', 'person')
     disliked_outfit = request.form.get('disliked_outfit', None)
     recommendation_type = request.form.get('recommendation_type', 'closet')
+    include_trends = request.form.get('include_trends', 'false').lower() == 'true'
 
-    if recommendation_type == 'closet':
-        if not user_closet:
-            return jsonify({'message': 'Your closet is empty. Please add some items first or switch to "General outfit idea"!'}), 400
-        
-        # Craft the prompt for a closet-based recommendation
-        gemini_prompt = (
-            f"You are a professional stylist. Recommend a stylish {gender} outfit. "
-            f"Based on a closet containing the following items: {', '.join(user_closet)}. "
-            f"For the occasion: '{occasion}', "
-            f"in the style of: '{style}', "
-            f"please recommend a single, complete, and stylish outfit. "
-            f"The outfit must be a logical combination of clothing items, for example do not pair a skirt/shirt with a dress "
-            f"Do not recommend clothing worn by a woman if the gender is male. "
-            f"Do not include items that are not in the closet. "
-            f"if an outfit isnt possible with the available items, say so. "
-        )
-
-    else: 
-        # Craft the prompt for a general recommendation
-        gemini_prompt = (
-            f"You are a professional fashion stylist. Recommend a stylish {gender} outfit. "
-            f"For a '{occasion}' occasion and a '{style}' style, "
-            f"please recommend a single, complete, and stylish outfit. "
-            f"The outfit must include exactly one top and one bottom. "
-            f"The recommendation should be practical and fashionable. "
-            f"The outfit must be a logical combination of clothing items, for example do not pair a skirt/shirt with a dress "
-            f"Do not recommend clothing  worn by a woman if the gender is male. "
-        )
-
-    # Add the disliked outfit as a negative constraint if it exists
-    if disliked_outfit:
-        gemini_prompt += f" The previous recommendation, '{disliked_outfit}', was not liked. Please provide a new recommendation that is significantly different and does not include any of the items mentioned in the disliked outfit. "
-
-    gemini_prompt += f"Explain why this outfit is recommended, but keep the output text concise. If a complete and logical outfit is not possible from the provided items, say so."
-
-    # 2. Get the outfit recommendation from the Gemini API
-    recommendation_text = call_gemini_api(gemini_prompt)
-    if not recommendation_text:
-        return jsonify({'message': 'Could not generate a text recommendation. Please try again.'}), 500
-
-    # 3. Return only the text recommendation to the frontend
+    # Use the outfit generator to get a recommendation
+    recommendation_text = generate_outfit_recommendation(
+        user_closet, occasion, style, gender, disliked_outfit, recommendation_type
+        recommendation_type, include_trends
+    )
+    
+    # Check if there was an error with the closet
+    if "Your closet is empty" in recommendation_text and recommendation_type == 'closet':
+        return jsonify({'message': recommendation_text}), 400
+    
+    # Return the recommendation to the frontend
     return jsonify({
         'recommendation': recommendation_text,
     }), 200
+
+
+# Add these routes to your app.py
+@app.route('/analyze_trends', methods=['POST'])
+def analyze_trends():
+    """Endpoint for analyzing fashion trends"""
+    if 'uid' not in session:
+        return jsonify({'message': 'Unauthorized'}), 401
+        
+    try:
+        data = request.get_json()
+        query = data.get("query", "current fashion trends")
+
+        agent_executor = get_trend_agent()
+        raw_response = agent_executor.invoke({"query": query})
+        structured_response = parse_trend_response(raw_response)
+
+        return jsonify(structured_response.dict())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/get_trendy_outfit', methods=['POST'])
+def get_trendy_outfit():
+    """Generates an outfit based on current trends"""
+    if 'uid' not in session:
+        return jsonify({'message': 'Unauthorized'}), 401
+
+    uid = session['uid']
+    user_ref = db.collection("closets").document(uid)
+    doc = user_ref.get()
+
+    user_closet = []
+    if doc.exists:
+        user_closet = doc.to_dict().get("items", [])
+
+    # Get parameters
+    occasion = request.form.get('occasion', '')
+    style = request.form.get('style_preference', '')
+    gender = request.form.get('gender', 'person')
+    
+    # First get current trends
+    try:
+        trend_response = analyze_trends_internal(f"{occasion} {style} fashion trends")
+        trends = trend_response.get('current_trends', [])[:3]  # Get top 3 trends
+    except:
+        trends = []
+    
+    # Generate outfit considering trends
+    recommendation_text = generate_outfit_recommendation(
+        user_closet, occasion, style, gender, 
+        disliked_outfit=None, 
+        recommendation_type='closet',
+        trends=trends
+    )
+    
+    return jsonify({
+        'recommendation': recommendation_text,
+        'trends_considered': trends
+    }), 200
+
+def analyze_trends_internal(query):
+    """Internal function to analyze trends without HTTP request"""
+    agent_executor = get_trend_agent()
+    raw_response = agent_executor.invoke({"query": query})
+    return parse_trend_response(raw_response).dict()
+
+
 
 @app.route('/logout')
 def logout():
