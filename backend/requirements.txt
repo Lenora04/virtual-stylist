@@ -1,0 +1,17 @@
+# Core dependencies
+python-dotenv==1.1.1
+pydantic==2.11.7
+pydantic_core==2.33.2
+requests
+beautifulsoup4
+
+# LLM & tools
+langchain
+langchain-google-genai
+ddgs
+wikipedia
+
+# Flask
+Flask==3.0.3
+
+firebase-admin
