@@ -1,0 +1,25 @@
+﻿# Python
+__pycache__/
+*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+ENV/
+.venv/
+
+
+# Environment variables / secrets
+.env
+*.json
+run_backend.ps1
+
+# IDEs/editors
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
