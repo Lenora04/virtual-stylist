@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - Virtual Stylist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; 
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-4 sm:p-8">
+
+    <header class="flex justify-between items-center mb-8 flex-wrap">
+        <h1 class="text-4xl font-bold text-purple-400">User Profile</h1>
+        <div class="flex space-x-2">
+            <a href="/" class="bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors duration-200">
+                <i class="fas fa-arrow-left mr-2"></i>Back
+            </a>
+            <a href="/logout" class="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors duration-200">
+                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-2xl mx-auto bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700">
+        <h2 class="text-2xl font-semibold text-gray-100 mb-6">Your Preferences</h2>
+
+        <form id="userPreferencesForm" class="space-y-4">
+            <!-- Favorite Colors -->
+            <div>
+                <label for="favorite_colors" class="block text-gray-300 font-medium mb-1">Favorite Colors (comma separated)</label>
+                <input type="text" id="favorite_colors" placeholder="e.g., red, blue, green" class="w-full px-4 py-2 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200">
+            </div>
+
+            <!-- Skin Color -->
+            <div>
+                <label for="skin_color" class="block text-gray-300 font-medium mb-1">Skin Color</label>
+                <input type="text" id="skin_color" placeholder="e.g., light, medium, dark" class="w-full px-4 py-2 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200">
+            </div>
+
+            <!-- Height -->
+            <div>
+                <label for="height" class="block text-gray-300 font-medium mb-1">Height (cm)</label>
+                <input type="number" id="height" placeholder="e.g., 170" class="w-full px-4 py-2 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200">
+            </div>
+
+            <!-- Weight -->
+            <div>
+                <label for="weight" class="block text-gray-300 font-medium mb-1">Weight (kg)</label>
+                <input type="number" id="weight" placeholder="e.g., 60" class="w-full px-4 py-2 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200">
+            </div>
+
+            <!-- Style -->
+            <div>
+                <label for="style" class="block text-gray-300 font-medium mb-1">Preferred Style</label>
+                <input type="text" id="style" placeholder="e.g., casual, boho chic" class="w-full px-4 py-2 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200">
+            </div>
+
+            <div class="flex justify-center">
+                <button type="submit" class="bg-green-600 text-white font-semibold py-2 px-8 rounded-md hover:bg-green-700 transition-colors duration-200 transform hover:scale-105">
+                    Save Preferences
+                </button>
+            </div>
+        </form>
+
+        <div id="statusMessage" class="mt-4 text-center text-green-400 hidden"></div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('userPreferencesForm');
+            const statusMessage = document.getElementById('statusMessage');
+
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                statusMessage.classList.add('hidden');
+
+                const preferences = {
+                    favorite_colors: document.getElementById('favorite_colors').value.split(',').map(c => c.trim()).filter(c => c),
+                    skin_color: document.getElementById('skin_color').value.trim(),
+                    height: document.getElementById('height').value,
+                    weight: document.getElementById('weight').value,
+                    style: document.getElementById('style').value.trim()
+                };
+
+                try {
+                    const response = await fetch('/save_preferences', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({preferences})
+                    });
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        statusMessage.textContent = "Preferences saved successfully!";
+                        statusMessage.classList.remove('hidden');
+                        statusMessage.classList.remove('text-red-400');
+                        statusMessage.classList.add('text-green-400');
+                    } else {
+                        statusMessage.textContent = result.error || "Failed to save preferences.";
+                        statusMessage.classList.remove('hidden');
+                        statusMessage.classList.remove('text-green-400');
+                        statusMessage.classList.add('text-red-400');
+                    }
+                } catch (err) {
+                    statusMessage.textContent = "Network error. Please try again.";
+                    statusMessage.classList.remove('hidden');
+                    statusMessage.classList.remove('text-green-400');
+                    statusMessage.classList.add('text-red-400');
+                }
+            });
+        });
+
+
+
+        document.addEventListener('DOMContentLoaded', async function() {
+    const response = await fetch('/get_preferences');
+    if (response.ok) {
+        const prefs = await response.json();
+        document.getElementById('favorite_colors').value = (prefs.favorite_colors || []).join(', ');
+        document.getElementById('skin_color').value = prefs.skin_color || '';
+        document.getElementById('height').value = prefs.height || '';
+        document.getElementById('weight').value = prefs.weight || '';
+        document.getElementById('style').value = prefs.style || '';
+    }
+});
+
+    </script>
+
+</body>
+</html>

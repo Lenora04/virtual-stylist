@@ -1,22 +1,20 @@
 from langchain.tools import Tool
 import requests
 from bs4 import BeautifulSoup
-from duckduckgo_search import DDGS   
+from duckduckgo_search import DDGS
 
-# Common fashion keywords
-FASHION_KEYWORDS = ["fashion", "style", "outfit", "ootd", "wear", "clothing", "look"]
+# ---------------------------
+# Trend Search Tools
+# ---------------------------
+FASHION_KEYWORDS = ["fashion", "style", "outfit", "ootd", "clothing", "look"]
 
 def filter_results(results):
-    """Keep only results containing fashion-related keywords"""
     return [
         r["body"] + " -> " + r["href"]
         for r in results
         if any(word in r["body"].lower() for word in FASHION_KEYWORDS)
     ]
 
-# ----------------------------------------------------
-# Instagram Hashtag Search
-# ----------------------------------------------------
 def instagram_fashion_hashtags(query: str):
     with DDGS() as ddgs:
         results = list(ddgs.text(f"Instagram #{query} fashion", max_results=10))
@@ -25,12 +23,9 @@ def instagram_fashion_hashtags(query: str):
 instagram_tool = Tool(
     name="instagram_fashion_search",
     func=instagram_fashion_hashtags,
-    description="Search Instagram fashion hashtags (latest trends, posts, and pages).",
+    description="Search Instagram fashion hashtags."
 )
 
-# ----------------------------------------------------
-# TikTok Hashtag Search
-# ----------------------------------------------------
 def tiktok_fashion_hashtags(query: str):
     with DDGS() as ddgs:
         results = list(ddgs.text(f"TikTok #{query} fashion trend", max_results=10))
@@ -39,26 +34,9 @@ def tiktok_fashion_hashtags(query: str):
 tiktok_tool = Tool(
     name="tiktok_fashion_search",
     func=tiktok_fashion_hashtags,
-    description="Search TikTok fashion hashtags (trending challenges, OOTD, fashion ideas).",
+    description="Search TikTok fashion hashtags."
 )
 
-# ----------------------------------------------------
-# Facebook Hashtag Search
-# ----------------------------------------------------
-def facebook_fashion_hashtags(query: str):
-    with DDGS() as ddgs:
-        results = list(ddgs.text(f"Facebook #{query} fashion", max_results=10))
-    return filter_results(results)
-
-facebook_tool = Tool(
-    name="facebook_fashion_search",
-    func=facebook_fashion_hashtags,
-    description="Search Facebook fashion hashtags (public posts & groups).",
-)
-
-# ----------------------------------------------------
-# Fashion Blogs (Vogue, Elle, etc.)
-# ----------------------------------------------------
 def fashion_blogs_search(query: str):
     urls = [
         "https://www.vogue.com/fashion",
@@ -76,7 +54,6 @@ def fashion_blogs_search(query: str):
                 text = link.get_text(strip=True)
                 href = link["href"]
                 if text and any(word in text.lower() for word in FASHION_KEYWORDS):
-                    # Make absolute URL if relative
                     if href.startswith("/"):
                         href = url.rstrip("/") + href
                     articles.append(f"{text} -> {href}")
@@ -87,10 +64,41 @@ def fashion_blogs_search(query: str):
 blogs_tool = Tool(
     name="fashion_blogs_search",
     func=fashion_blogs_search,
-    description="Search Vogue, Elle, Harper's Bazaar and other fashion blogs for latest articles.",
+    description="Search fashion blogs for latest articles."
 )
 
-# ----------------------------------------------------
-# Export tools
-# ----------------------------------------------------
-tools = [instagram_tool, tiktok_tool, facebook_tool, blogs_tool]
+# ---------------------------
+# Shopping Site Search Tools
+# ---------------------------
+SHOPPING_SITES = ["https://www.temu.com/", "https://www.nolimit.lk/","https://mimosaforever.com/?srsltid=AfmBOop751_lo0po6pcgC0HFTbYfoCGixhzLfnh_WP7-eFE7ey1tGeVl","amazon.com"]
+PRODUCT_KEYWORDS = ["shirt", "top", "dress", "jeans", "trousers", "jacket", "coat", "skirt", "sweater"]
+
+def shopping_site_search(query: str):
+    results_all = []
+    with DDGS() as ddgs:
+        for site in SHOPPING_SITES:
+            search_query = f"site:{site} {query}"
+            results = list(ddgs.text(search_query, max_results=5))
+            # filter for fashion keywords
+            for r in results:
+                text = r.get("body", "")
+                href = r.get("href", "")
+                if any(word in text.lower() for word in PRODUCT_KEYWORDS):
+                    results_all.append(f"{text} -> {href}")
+    return results_all
+
+shopping_tool = Tool(
+    name="shopping_site_search",
+    func=shopping_site_search,
+    description="Search multiple shopping websites for clothing products."
+)
+
+# ---------------------------
+# Export all tools
+# ---------------------------
+tools = [
+    instagram_tool,
+    tiktok_tool,
+    blogs_tool,
+    shopping_tool
+]
