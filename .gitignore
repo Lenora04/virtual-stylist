@@ -1,13 +1,20 @@
 # Python
 __pycache__/
+*.pyc
 *.py[cod]
 *.pyo
 *.pyd
 
-# Virtual environments
+# Virtual environment
 venv/
-.env
+ENV/
 .venv/
+
+
+# Environment variables / secrets
+.env
+*.json
+run_backend.ps1
 
 # IDEs/editors
 .vscode/
