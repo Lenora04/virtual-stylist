@@ -1,10 +1,9 @@
-# app.py
-# Backend for the Virtual Stylist application
-# Handles authentication, closet management, trend analysis, preferences, outfit generation, and product search.
-
+# main.py
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from dotenv import load_dotenv
+
+# Firebase
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
 
@@ -12,17 +11,18 @@ from firebase_admin import credentials, auth, firestore
 from agents.OutfitGenerator import generate_outfit_recommendation
 from agents.trendanalyzer import get_trend_agent, parse_trend_response
 from agents.product_search_agent import get_product_search_agent, parser as product_parser
-from agents.user_preference_agent import adjust_outfit_with_preferences  # <-- your user_pref blueprint logic extracted
+from agents.user_preference_agent import adjust_outfit_with_preferences
 
 # Load environment variables
 load_dotenv()
 
-# Firebase Initialization
-cred_path = os.environ.get(
-    "FIREBASE_SERVICE_KEY_PATH",
-    "C:/Users/USER/Desktop/stuff/IRWA/virtual-stylist/virtual-stylist-52782-firebase-adminsdk.json"
-)
+# ----------------- Firebase Initialization -----------------
+cred_path = os.environ.get("FIREBASE_SERVICE_KEY_PATH")
+if not cred_path or not os.path.exists(cred_path):
+    raise FileNotFoundError(f"Firebase JSON not found. Set FIREBASE_SERVICE_KEY_PATH in .env (tried {cred_path})")
+
 cred = credentials.Certificate(cred_path)
+
 try:
     app_firebase = firebase_admin.initialize_app(cred)
 except ValueError:
@@ -30,17 +30,15 @@ except ValueError:
 
 db = firestore.client(app=app_firebase)
 
-# Flask config
+# ----------------- Flask Setup -----------------
 template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "templates"))
 app = Flask(__name__, template_folder=template_dir)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "supersecret")
 
-
-# ---------------- ROUTES ----------------
+# ----------------- ROUTES -----------------
 
 @app.route("/")
 def home():
-    """Home page with closet items."""
     if "uid" in session:
         uid = session["uid"]
         user_ref = db.collection("closets").document(uid)
@@ -49,11 +47,9 @@ def home():
         return render_template("index.html", closet=user_closet)
     return redirect(url_for("login_page"))
 
-
 @app.route("/register")
 def register_page():
     return render_template("register.html")
-
 
 @app.route("/login", methods=["GET", "POST"])
 def login_page():
@@ -66,18 +62,15 @@ def login_page():
             uid = decoded_token.get("uid")
             if not uid:
                 return jsonify({"message": "Invalid ID token"}), 401
-
             session["uid"] = uid
             user_ref = db.collection("closets").document(uid)
             if not user_ref.get().exists:
                 user_ref.set({"items": []})
-
             return jsonify({"message": "Authentication successful!"}), 200
         except Exception as e:
             print("Login error:", e)
             return jsonify({"message": "Login failed"}), 500
     return render_template("login.html")
-
 
 @app.route("/add-item", methods=["POST"])
 def add_item():
@@ -87,14 +80,12 @@ def add_item():
     item = request.form.get("itemInput", "").strip()
     if not item:
         return jsonify({"message": "Item cannot be empty."}), 400
-
     user_ref = db.collection("closets").document(uid)
     doc = user_ref.get()
     items = doc.to_dict().get("items", []) if doc.exists else []
     items.append(item)
     user_ref.set({"items": items})
     return jsonify({"message": "Item added", "item": item}), 200
-
 
 @app.route("/delete-item", methods=["POST"])
 def delete_item():
@@ -104,12 +95,10 @@ def delete_item():
     item = request.form.get("item")
     if not item:
         return jsonify({"message": "Item not specified"}), 400
-
     user_ref = db.collection("closets").document(uid)
     doc = user_ref.get()
     if not doc.exists:
         return jsonify({"message": "Closet not found"}), 404
-
     items = doc.to_dict().get("items", [])
     try:
         items.remove(item)
@@ -118,19 +107,15 @@ def delete_item():
     except ValueError:
         return jsonify({"message": "Item not found"}), 404
 
-
 @app.route("/generate-outfit", methods=["POST"])
 def generate_outfit():
-    """Full pipeline: trends → preferences → outfit → product search."""
     if "uid" not in session:
         return jsonify({"message": "Unauthorized"}), 401
-
     uid = session["uid"]
     user_ref = db.collection("closets").document(uid)
     doc = user_ref.get()
     user_closet = doc.to_dict().get("items", []) if doc.exists else []
 
-    # Get form inputs
     occasion = request.form.get("occasion", "")
     style = request.form.get("style_preference", "")
     gender = request.form.get("gender", "person")
@@ -157,7 +142,7 @@ def generate_outfit():
     preferences = user_doc.to_dict().get("preferences", {}) if user_doc.exists else {}
     adjusted = adjust_outfit_with_preferences(recommendation_text, preferences)
 
-    # Step 4: Product search with tools
+    # Step 4: Product search
     agent_executor = get_product_search_agent()
     raw_response = agent_executor.invoke({"outfit_description": adjusted["outfit"]})
     output = raw_response.get("output", "")
@@ -168,14 +153,12 @@ def generate_outfit():
     except Exception:
         structured_response = {"outfit": adjusted["outfit"], "shopping_links": [], "sources": []}
 
-    # Final return
     return jsonify({
         "recommendation": adjusted["outfit"],
         "reasons": adjusted["reasons"],
         "trends_considered": trends,
         "products": structured_response
     }), 200
-
 
 @app.route("/analyze_trends", methods=["POST"])
 def analyze_trends():
@@ -188,18 +171,15 @@ def analyze_trends():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 def analyze_trends_internal(query):
     agent_executor = get_trend_agent()
     raw_response = agent_executor.invoke({"query": query})
     return parse_trend_response(raw_response).dict()
 
-
 @app.route("/logout")
 def logout():
     session.pop("uid", None)
     return redirect(url_for("login_page"))
-
 
 @app.route("/firebase-config")
 def firebase_config():
@@ -211,18 +191,15 @@ def firebase_config():
         "messagingSenderId": os.environ.get("FIREBASE_MESSAGING_SENDER_ID"),
         "appId": os.environ.get("FIREBASE_APP_ID")
     })
+
 @app.route("/user-profile", methods=["GET"])
 def user_profile():
-    """Return user profile and preferences."""
     if "uid" not in session:
         return jsonify({"error": "Unauthorized"}), 401
     uid = session["uid"]
     user_doc = db.collection("users").document(uid).get()
     preferences = user_doc.to_dict().get("preferences", {}) if user_doc.exists else {}
-    return jsonify({
-        "uid": uid,
-        "preferences": preferences
-    })
+    return jsonify({"uid": uid, "preferences": preferences})
 
 @app.route("/get_preferences", methods=["GET"])
 def get_preferences():
@@ -233,7 +210,6 @@ def get_preferences():
     preferences = user_doc.to_dict().get("preferences", {}) if user_doc.exists else {}
     return jsonify(preferences), 200
 
-
 @app.route("/save_preferences", methods=["POST"])
 def save_preferences():
     if "uid" not in session:
@@ -241,23 +217,20 @@ def save_preferences():
     uid = session["uid"]
     data = request.get_json()
     prefs = data.get("preferences", {})
-    
-    # Save to Firestore
     try:
         db.collection("users").document(uid).set({"preferences": prefs}, merge=True)
         return jsonify({"message": "Preferences saved successfully"}), 200
     except Exception as e:
         print("Error saving preferences:", e)
         return jsonify({"error": "Failed to save preferences"}), 500
-    
+
 @app.route("/userprofile")
 def userprofile_page():
-    """Render the user profile form (HTML)."""
     if "uid" not in session:
         return redirect(url_for("login_page"))
     return render_template("userprofile.html")
 
-
+# ----------------- Run App -----------------
 if __name__ == "__main__":
     host = os.environ.get("HOST", "127.0.0.1")
     port = int(os.environ.get("PORT", 5000))
