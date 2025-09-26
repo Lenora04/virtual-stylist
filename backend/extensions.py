@@ -1,17 +1,20 @@
-# extensions.py
 import os
 import firebase_admin
 from firebase_admin import credentials, firestore
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv()  # Load variables from .env
 
-cred_path = os.environ.get(
-    "FIREBASE_SERVICE_KEY_PATH",
-    "C:/Users/ASUS/Desktop/Virtual Stylist/virtual-stylist/virtual-stylist-52782-firebase-adminsdk-fbsvc-6881e2d02f.json"
-)
+# Read the path from environment variable
+cred_path = os.environ.get("FIREBASE_SERVICE_KEY_PATH")
+
+if not cred_path or not os.path.exists(cred_path):
+    raise FileNotFoundError(
+        f"Firebase JSON not found. Set FIREBASE_SERVICE_KEY_PATH in .env (tried {cred_path})"
+    )
+
+# Initialize Firebase
 cred = credentials.Certificate(cred_path)
-
 try:
     app_firebase = firebase_admin.initialize_app(cred)
 except ValueError:

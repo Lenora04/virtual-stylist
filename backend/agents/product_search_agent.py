@@ -8,21 +8,21 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 from pydantic import BaseModel
-from tools import tools  # <-- Import your scraping tools
+from tools import tools  
 
 load_dotenv()
 
-# ----------------------------------------------
+
 # Define Product Search Response Schema
-# ----------------------------------------------
+
 class ProductSearchResponse(BaseModel):
     outfit: str
     shopping_links: list[str]
     sources: list[str]
 
-# ----------------------------------------------
+
 # Initialize Gemini
-# ----------------------------------------------
+
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-flash",
     temperature=0.4,
