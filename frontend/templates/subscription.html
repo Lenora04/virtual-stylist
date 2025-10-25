@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Plans - Virtual Stylist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom Variables and Global Styles for the Magical Theme */
+        :root {
+            --dark-magical: #0a011a; /* Very dark, almost black purple */
+            --mirror-frame: #3f0071; /* Deep purple for borders/accents */
+            --magic-glow: #e9d5ff; /* Pale purple for text/highlights */
+            --action-purple: #9333ea; /* Bright purple for main actions */
+            --action-hover: #a855f7; /* Lighter purple on hover */
+            --success-green: #34d399; /* Standard green for success, slightly muted */
+            --error-red: #f87171; /* Standard red for errors */
+            --pink-dust-trail-color: #ffb6f9;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-magical);
+            color: var(--magic-glow);
+            min-height: 100vh;
+            background-image: radial-gradient(circle at center, rgba(147, 51, 234, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 60s linear infinite;
+            overflow-x: hidden;
+            position: relative;
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewport='0 0 100 100' style='fill:black;font-size:20px;'><text y='50%'>🖌️</text></svg>") 16 16, pointer; 
+        }
+
+        @keyframes moveBackground {
+            from { background-position: 0 0; }
+            to { background-position: 500px 500px; }
+        }
+        
+        /*  Sparkle layer styles */
+        .sparkle-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 0;
+        }
+
+        .sparkle {
+            position: absolute; width: 4px; height: 4px; background: radial-gradient(circle, #ff9ff3 0%, transparent 70%); border-radius: 50%; animation: floatSparkle 6s linear infinite; opacity: 0.7;
+        }
+
+        @keyframes floatSparkle {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100vh) scale(0.3); opacity: 0; }
+        }
+
+        h1, h2 {
+            font-family: 'Cinzel', serif;
+            text-shadow: 0 0 5px rgba(233, 213, 255, 0.5);
+        }
+
+        /* Card and Button Styles (Adapted from original styles) */
+        .magic-btn {
+            font-family: 'Cinzel', serif; font-weight: 700; transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); position: relative; z-index: 2;
+        }
+        
+        .btn-home { /* Reusing btn-profile for Home button */
+            background-color: var(--action-purple); color: var(--magic-glow);
+        }
+        .btn-home:hover {
+            background-color: var(--action-hover); box-shadow: 0 0 10px var(--action-hover);
+        }
+
+        .plan-card-base {
+            background-color: rgba(30, 0, 48, 0.8); 
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--mirror-frame);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            z-index: 2;
+            height: 100%; /* Make cards fill space */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .plan-card-base:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 30px rgba(147, 51, 234, 0.5);
+        }
+
+        /* Free Plan */
+        .plan-free {
+            border-color: var(--mirror-frame);
+            box-shadow: 0 0 15px var(--mirror-frame);
+        }
+        .btn-inactive {
+            background-color: var(--mirror-frame);
+            color: rgba(233, 213, 255, 0.5);
+            cursor: not-allowed;
+            margin-top: auto; /* Push button to the bottom */
+        }
+        
+        /* Premium Monthly */
+        .plan-monthly {
+            background: linear-gradient(to bottom, rgba(147, 51, 234, 0.7), rgba(93, 51, 234, 0.9)); /* Purple gradient */
+            border-color: var(--action-purple);
+            box-shadow: 0 0 25px var(--action-purple);
+        }
+        .btn-monthly {
+            background-color: var(--success-green); 
+            color: var(--dark-magical);
+            margin-top: auto;
+        }
+        .btn-monthly:hover {
+            background-color: #10b981;
+            box-shadow: 0 0 15px var(--success-green);
+        }
+
+        /* Premium Yearly */
+        .plan-yearly {
+            background: linear-gradient(to bottom, #d97706, #fbbf24); /* Gold/Yellow gradient */
+            border-color: #fbbf24;
+            box-shadow: 0 0 30px #fbbf24;
+        }
+        .btn-yearly {
+            background-color: var(--dark-magical);
+            color: #fbbf24;
+            margin-top: auto;
+        }
+        .btn-yearly:hover {
+            background-color: #1f0140;
+            color: #fcd34d;
+            box-shadow: 0 0 20px #fcd34d;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-6 sm:p-10">
+
+    <div class="sparkle-layer" id="sparkleLayer"></div>
+
+    <header class="flex justify-between items-center mb-10 flex-wrap border-b border-[var(--mirror-frame)] pb-4">
+        <h1 class="text-4xl font-extrabold text-[var(--magic-glow)] tracking-wider flex items-center">
+            <i class="fas fa-star-and-crescent mr-3 text-[var(--action-purple)]"></i> Subscriptions
+        </h1>
+        <a href="/" class="magic-btn btn-home font-semibold py-2 px-6 rounded-full hover:shadow-lg mt-4 sm:mt-0">
+            <i class="fas fa-home mr-2"></i>Home
+        </a>
+    </header>
+
+    <main class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+        <div class="plan-card-base plan-free p-8 rounded-2xl">
+            <h2 class="text-3xl font-semibold text-[var(--magic-glow)] mb-2">Basic Plan (Free)</h2>
+            <p class="text-gray-400 mb-6 font-bold">(Currently Active)</p>
+            <ul class="space-y-4 text-[var(--magic-glow)]/80 mb-8 text-base flex-grow">
+                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-[var(--success-green)]"></i> 5 outfit recommendations from your closet / Month</li>
+                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-[var(--success-green)]"></i> 10 general outfit ideas from AI / Month</li>
+                <li class="flex items-start"><i class="fas fa-infinity mr-3 mt-1 text-[var(--success-green)]"></i> Unlimited “Try Again” attempts</li>
+            </ul>
+            <button disabled class="w-full magic-btn btn-inactive py-3 rounded-lg font-semibold">Active Plan</button>
+        </div>
+
+        <div class="plan-card-base plan-monthly p-8 rounded-2xl">
+            <h2 class="text-3xl font-semibold text-white mb-2">Premium Monthly</h2>
+            <p class="text-[var(--magic-glow)] mb-6 text-2xl font-bold">LKR 1,500 <span class="text-lg font-normal">/ month</span></p>
+            <ul class="space-y-4 text-white mb-8 text-base flex-grow">
+                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-[var(--success-green)]"></i> Unlimited outfit recommendations from your closet</li>
+                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-[var(--success-green)]"></i> 20 general outfit ideas from AI / Month</li>
+                <li class="flex items-start"><i class="fas fa-infinity mr-3 mt-1 text-[var(--success-green)]"></i> Unlimited “Try Again” attempts</li>
+            </ul>
+            <a href="premium-monthly" class="block text-center magic-btn btn-monthly py-3 rounded-lg transform hover:scale-[1.02]">
+                <i class="fas fa-sparkles mr-2"></i> Begin Monthly Subscription
+            </a>
+        </div>
+
+        <div class="plan-card-base plan-yearly p-8 rounded-2xl">
+            <h2 class="text-3xl font-semibold text-gray-900 mb-2">Premium Yearly</h2>
+            <p class="text-gray-800 mb-6 text-2xl font-bold">LKR 20,000 <span class="text-lg font-normal">/ year</span></p>
+            <ul class="space-y-4 text-gray-900 font-medium mb-8 text-base flex-grow">
+                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-[var(--success-green)]"></i> Unlimited outfit recommendations from your closet / Year</li>
+                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-[var(--success-green)]"></i> Unlimited general outfit ideas from AI / Year</li>
+                <li class="flex items-start"><i class="fas fa-infinity mr-3 mt-1 text-[var(--success-green)]"></i> Unlimited “Try Again” attempts</li>
+            </ul>
+            <a href="premium-yearly" class="block text-center magic-btn btn-yearly py-3 rounded-lg transform hover:scale-[1.02]">
+                <i class="fas fa-crown mr-2"></i> Unlock Yearly Subscription
+            </a>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sparkleLayer = document.getElementById('sparkleLayer'); 
+            const createSparkle = (x, y) => {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle-trail'; 
+                sparkle.style.left = `${x}px`;
+                sparkle.style.top = `${y}px`;
+                document.body.appendChild(sparkle);
+                setTimeout(() => sparkle.remove(), 1000); 
+            };
+            document.addEventListener('mousemove', (e) => {
+                createSparkle(e.pageX, e.pageY);
+            });
+            for (let i = 0; i < 50; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.classList.add('sparkle');
+                sparkle.style.left = Math.random() * 100 + 'vw';
+                sparkle.style.top = Math.random() * 100 + 'vh';
+                sparkle.style.animationDelay = Math.random() * 6 + 's';
+                sparkle.style.animationDuration = 4 + Math.random() * 4 + 's';
+                sparkleLayer.appendChild(sparkle);
+            }
+        });
+    </script>
+</body>
+</html>

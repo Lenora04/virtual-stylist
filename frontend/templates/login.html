@@ -5,15 +5,172 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Virtual Stylist - Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Custom Variables and Global Styles for the Magical Theme */
+        :root {
+            --dark-magical: #0a011a; /* Very dark, almost black purple */
+            --mirror-frame: #3f0071; /* Deep purple for borders/accents */
+            --magic-glow: #e9d5ff; /* Pale purple for text/highlights */
+            --action-purple: #9333ea; /* Bright purple for main actions */
+            --action-hover: #a855f7; /* Lighter purple on hover */
+            --success-green: #34d399; /* Standard green for success, slightly muted */
+            --error-red: #f87171; /* Standard red for errors */
+            --pink-dust-trail-color: #ffb6f9; /* Matched pink dust */
+        }
+        
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1a202c; /* Dark background */
+            font-family: 'Inter', sans-serif; /* Keep Inter for readability */
+            background-color: var(--dark-magical);
+            color: var(--magic-glow);
+            min-height: 100vh;
+            /* Subtle background animation for a "live" magical feel */
+            background-image: radial-gradient(circle at center, rgba(147, 51, 234, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 60s linear infinite;
+            overflow-x: hidden;
+            position: relative;
+
+            /* CUSTOM: Makeup Brush Cursor */
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewport='0 0 100 100' style='fill:black;font-size:20px;'><text y='50%'>🖌️</text></svg>") 16 16, pointer; 
+        }
+
+        @keyframes moveBackground {
+            from { background-position: 0 0; }
+            to { background-position: 500px 500px; }
+        }
+        
+        /* 🌌 Sparkle layer (subtle glowing dots floating around) */
+        .sparkle-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #ff9ff3 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatSparkle 6s linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes floatSparkle {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) scale(0.3);
+                opacity: 0;
+            }
+        }
+
+        h1, h2 {
+            font-family: 'Cinzel', serif; /* Use a magical/elegant font for headings */
+            text-shadow: 0 0 5px rgba(233, 213, 255, 0.5); /* Subtle glow on titles */
+        }
+
+        /* Card and Button Styles */
+        .magic-card {
+            background-color: rgba(30, 0, 48, 0.8); /* Dark, transparent-ish purple for main sections */
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--mirror-frame);
+            box-shadow: 0 0 15px rgba(147, 51, 234, 0.5); /* Initial purple glow */
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* The main login container */
+        .bg-gray-800 {
+            /* Overriding Tailwind's bg-gray-800 with the magic-card style */
+            background-color: rgba(30, 0, 48, 0.8) !important;
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--mirror-frame) !important;
+            box-shadow: 0 0 15px rgba(147, 51, 234, 0.5) !important;
+        }
+        
+        /* The input fields - targeting Tailwind classes for override */
+        .bg-gray-700 {
+            background-color: rgba(0, 0, 0, 0.3) !important;
+            border: 1px solid var(--mirror-frame) !important;
+            color: var(--magic-glow) !important;
+            transition: all 0.3s ease;
+        }
+        .focus\:ring-purple-500:focus, .focus\:border-purple-500:focus {
+            outline: none !important;
+            border-color: var(--action-purple) !important;
+            box-shadow: 0 0 8px var(--action-purple) !important;
+            --tw-ring-color: var(--action-purple) !important;
+        }
+
+        /* The login button */
+        .bg-purple-600 {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            background-color: var(--action-purple) !important;
+            color: var(--magic-glow) !important;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+        }
+        .hover\:bg-purple-700:hover {
+            background-color: var(--action-hover) !important;
+            box-shadow: 0 0 10px var(--action-hover) !important;
+            transform: scale(1.05); /* keep the transform */
+        }
+        .focus\:ring-purple-500:focus {
+            --tw-ring-color: var(--action-purple) !important;
+        }
+        
+        /* Text color overrides to match theme */
+        .text-gray-100 { color: var(--magic-glow) !important; }
+        .text-gray-300 { color: var(--magic-glow) !important; }
+        .text-gray-400 { color: #ccc; } /* Slightly lighter gray for secondary text */
+        .text-purple-400 { 
+            color: var(--action-hover) !important; 
+            text-shadow: 0 0 3px var(--action-hover);
+            transition: all 0.3s ease;
+        }
+        .hover\:text-purple-300:hover { 
+            color: var(--magic-glow) !important; 
+            text-shadow: 0 0 5px var(--magic-glow);
+        }
+        .text-red-400 { color: var(--error-red) !important; }
+
+        /* 💫 Pink dust trail */
+        .sparkle-trail {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, var(--pink-dust-trail-color) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fadeOut 1s ease-out forwards;
+            z-index: 10;
+            box-shadow: 0 0 8px var(--pink-dust-trail-color), 0 0 15px #ff66ff;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.2); }
         }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen bg-gray-900 text-white">
+
+    <div class="sparkle-layer" id="sparkleLayer"></div>
+
     <div class="bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-sm border border-gray-700">
         <h1 class="text-3xl font-bold mb-6 text-center text-gray-100">Login</h1>
         <p class="text-center text-gray-400 mb-8">Sign in with your email and password.</p>
@@ -39,6 +196,37 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js';
+
+        // 🌌 Sparkle layer JS MUST be included for background and mouse trail
+        document.addEventListener('DOMContentLoaded', function() {
+            const sparkleLayer = document.getElementById('sparkleLayer'); 
+
+            // Floating sparkles background
+            for (let i = 0; i < 50; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.classList.add('sparkle');
+                sparkle.style.left = Math.random() * 100 + 'vw';
+                sparkle.style.top = Math.random() * 100 + 'vh';
+                sparkle.style.animationDelay = Math.random() * 6 + 's';
+                sparkle.style.animationDuration = 4 + Math.random() * 4 + 's';
+                sparkleLayer.appendChild(sparkle);
+            }
+
+            // CUSTOM: Sparkle Generation Function (Mouse Trail)
+            function createSparkle(x, y) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle-trail'; 
+                sparkle.style.left = `${x}px`;
+                sparkle.style.top = `${y}px`;
+                document.body.appendChild(sparkle);
+                setTimeout(() => sparkle.remove(), 1000); 
+            }
+
+            // CUSTOM: Mousemove listener for sparkle trail
+            document.addEventListener('mousemove', (e) => {
+                createSparkle(e.pageX, e.pageY);
+            });
+        });
 
         // Fetch Firebase config from the backend
         async function fetchFirebaseConfig() {

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yearly Payment - Virtual Stylist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom Variables and Global Styles for the Magical Theme */
+        :root {
+            --dark-magical: #0a011a;
+            --mirror-frame: #3f0071;
+            --magic-glow: #e9d5ff;
+            --action-purple: #9333ea;
+            --action-hover: #a855f7;
+            --success-green: #34d399;
+            --pink-dust-trail-color: #ffb6f9;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-magical);
+            color: var(--magic-glow);
+            min-height: 100vh;
+            background-image: radial-gradient(circle at center, rgba(147, 51, 234, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 60s linear infinite;
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewport='0 0 100 100' style='fill:black;font-size:20px;'><text y='50%'>🖌️</text></svg>") 16 16, pointer; 
+        }
+
+        @keyframes moveBackground {
+            from { background-position: 0 0; }
+            to { background-position: 500px 500px; }
+        }
+        
+        h1, h2 {
+            font-family: 'Cinzel', serif;
+            text-shadow: 0 0 5px rgba(233, 213, 255, 0.5);
+        }
+
+        /* Card and Button Styles */
+        .magic-card {
+            background-color: rgba(30, 0, 48, 0.8);
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--mirror-frame);
+            box-shadow: 0 0 15px rgba(147, 51, 234, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .magic-btn {
+            font-family: 'Cinzel', serif; font-weight: 700; transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Using a gold/dark theme for the yearly button */
+        .btn-submit {
+            background-color: #fbbf24;
+            color: var(--dark-magical);
+        }
+        .btn-submit:hover {
+            background-color: #fcd34d;
+            box-shadow: 0 0 15px #fbbf24;
+        }
+
+        .btn-back {
+            background-color: var(--mirror-frame); 
+            color: var(--magic-glow);
+        }
+        .btn-back:hover {
+            background-color: var(--action-purple);
+            box-shadow: 0 0 10px var(--action-purple);
+        }
+
+        .magic-input {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--mirror-frame);
+            color: var(--magic-glow);
+        }
+        .magic-input:focus {
+            outline: none;
+            border-color: var(--action-purple);
+            box-shadow: 0 0 8px var(--action-purple);
+        }
+    </style>
+</head>
+<body class="p-6 sm:p-10 flex flex-col items-center">
+
+    <header class="w-full max-w-2xl text-center mb-10 border-b border-[var(--mirror-frame)] pb-4">
+        <h1 class="text-4xl font-extrabold text-[var(--magic-glow)] tracking-wider">Premium Yearly</h1>
+        <p class="text-xl text-yellow-400 mt-2">LKR 20,000 / year</p>
+    </header>
+
+    <main class="magic-card p-8 rounded-3xl w-full max-w-lg">
+        <h2 class="text-2xl font-bold text-[var(--magic-glow)] mb-6 flex items-center">
+            <i class="fas fa-crown mr-3 text-yellow-400"></i> Finalize Your Subscription
+        </h2>
+        
+        <form class="space-y-6">
+            <div>
+                <label for="cardName" class="block text-[var(--magic-glow)] font-semibold mb-2">Name on Card</label>
+                <input type="text" id="cardName" placeholder="Name" class="magic-input w-full px-4 py-3 rounded-lg" required>
+            </div>
+            <div>
+                <label for="cardNumber" class="block text-[var(--magic-glow)] font-semibold mb-2">Card Number</label>
+                <input type="text" id="cardNumber" placeholder="**** **** **** ****" class="magic-input w-full px-4 py-3 rounded-lg" required>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="expiry" class="block text-[var(--magic-glow)] font-semibold mb-2">Expiry Date (MM/YY)</label>
+                    <input type="text" id="expiry" placeholder="12/25" class="magic-input w-full px-4 py-3 rounded-lg" required>
+                </div>
+                <div>
+                    <label for="cvc" class="block text-[var(--magic-glow)] font-semibold mb-2">CVC</label>
+                    <input type="text" id="cvc" placeholder="***" class="magic-input w-full px-4 py-3 rounded-lg" required>
+                </div>
+            </div>
+            
+            <div class="pt-4 space-y-4">
+                <button type="submit" class="w-full magic-btn btn-submit py-3 rounded-lg transform hover:scale-[1.01]">
+                    <i class="fas fa-check-circle mr-2"></i> Confirm Payment of LKR 20,000
+                </button>
+                <a href="subscription" class="block text-center magic-btn btn-back py-3 rounded-lg">
+                    <i class="fas fa-arrow-left mr-2"></i> Return to Plans
+                </a>
+            </div>
+        </form>
+    </main>
+</body>
+</html>
