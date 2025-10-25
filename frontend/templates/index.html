@@ -1,225 +1,1027 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Virtual Stylist</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
+
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1a202c; /* Dark background */
+
+        /* Custom Variables and Global Styles for the Magical Theme */
+
+        :root {
+
+            --dark-magical: #0a011a; /* Very dark, almost black purple */
+
+            --mirror-frame: #3f0071; /* Deep purple for borders/accents */
+
+            --magic-glow: #e9d5ff; /* Pale purple for text/highlights */
+
+            --action-purple: #9333ea; /* Bright purple for main actions */
+
+            --action-hover: #a855f7; /* Lighter purple on hover */
+
+            --success-green: #34d399; /* Standard green for success, slightly muted */
+
+            --error-red: #f87171; /* Standard red for errors */
+
+            /* Matched pink dust from the second code block */
+
+            --pink-dust-trail-color: #ffb6f9;
+
         }
+
+        
+
+        body {
+
+            font-family: 'Inter', sans-serif; /* Keep Inter for readability */
+
+            background-color: var(--dark-magical);
+
+            color: var(--magic-glow);
+
+            min-height: 100vh;
+
+            /* Subtle background animation for a "live" magical feel */
+
+            background-image: radial-gradient(circle at center, rgba(147, 51, 234, 0.1) 1px, transparent 1px);
+
+            background-size: 50px 50px;
+
+            animation: moveBackground 60s linear infinite;
+
+            overflow-x: hidden; /* Added from the second style block */
+
+            position: relative; /* Added from the second style block */
+
+
+
+            /* CUSTOM: Makeup Brush Cursor */
+
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewport='0 0 100 100' style='fill:black;font-size:20px;'><text y='50%'>🖌️</text></svg>") 16 16, pointer;
+
+        }
+
+
+
+        @keyframes moveBackground {
+
+            from { background-position: 0 0; }
+
+            to { background-position: 500px 500px; }
+
+        }
+
+        
+
+        /* Sparkle layer (subtle glowing dots floating around) */
+
+        .sparkle-layer {
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            width: 100%;
+
+            height: 100%;
+
+            pointer-events: none;
+
+            overflow: hidden;
+
+            z-index: 0;
+
+        }
+
+
+
+        .sparkle {
+
+            position: absolute;
+
+            width: 4px;
+
+            height: 4px;
+
+            background: radial-gradient(circle, #ff9ff3 0%, transparent 70%);
+
+            border-radius: 50%;
+
+            animation: floatSparkle 6s linear infinite;
+
+            opacity: 0.7;
+
+        }
+
+
+
+        @keyframes floatSparkle {
+
+            0% {
+
+                transform: translateY(0) scale(1);
+
+                opacity: 1;
+
+            }
+
+            100% {
+
+                transform: translateY(-100vh) scale(0.3);
+
+                opacity: 0;
+
+            }
+
+        }
+
+
+
+        h1, h2 {
+
+            font-family: 'Cinzel', serif; /* Use a magical/elegant font for headings */
+
+            text-shadow: 0 0 5px rgba(233, 213, 255, 0.5); /* Subtle glow on titles */
+
+        }
+
+
+
+        /* Card and Button Styles */
+
+        .magic-card {
+
+            background-color: rgba(30, 0, 48, 0.8); /* Dark, transparent-ish purple for main sections */
+
+            backdrop-filter: blur(5px);
+
+            border: 2px solid var(--mirror-frame);
+
+            box-shadow: 0 0 15px rgba(147, 51, 234, 0.5); /* Initial purple glow */
+
+            transition: all 0.3s ease;
+
+            position: relative; /* Added from the second style block */
+
+            z-index: 2; /* Added from the second style block */
+
+        }
+
+        
+
+        /* Custom category card hover effect */
+
+        .category-card {
+
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+
+            background-color: rgba(63, 0, 113, 0.7); /* Darker purple base */
+
+        }
+
+        .category-card:hover {
+
+            transform: scale(1.05); /* Slightly bigger on hover */
+
+            box-shadow: 0 0 25px var(--action-purple); /* Stronger purple glow on hover */
+
+            border-color: var(--magic-glow);
+
+            background-color: var(--mirror-frame);
+
+        }
+
+
+
+        /* Button base style */
+
+        .magic-btn {
+
+            font-family: 'Cinzel', serif;
+
+            font-weight: 700;
+
+            transition: all 0.3s ease;
+
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+
+            position: relative; /* Added from the second style block */
+
+            z-index: 2; /* Added from the second style block */
+
+        }
+
+        
+
+        /* Primary/Profile Button (Blue to Mystic Purple) */
+
+        .btn-profile {
+
+            background-color: var(--action-purple);
+
+            color: var(--magic-glow);
+
+        }
+
+        .btn-profile:hover {
+
+            background-color: var(--action-hover);
+
+            box-shadow: 0 0 10px var(--action-hover);
+
+        }
+
+
+
+        /* Logout Button (Red to Darker Magic Red) */
+
+        .btn-logout {
+
+            background-color: #991b1b; /* Darker red */
+
+            color: var(--magic-glow);
+
+        }
+
+        .btn-logout:hover {
+
+            background-color: #b91c1c;
+
+            box-shadow: 0 0 10px #b91c1c;
+
+        }
+
+
+
+        /* Generate Outfit Button (Green to Enchanted Green) */
+
+        .btn-generate {
+
+            background-color: var(--success-green);
+
+            color: var(--dark-magical); /* Dark text on bright button */
+
+        }
+
+        .btn-generate:hover {
+
+            background-color: #10b981; /* Slightly darker green */
+
+            box-shadow: 0 0 15px var(--success-green);
+
+        }
+
+
+
+        /* Subscription Button (Purple to Golder/Star Purple) */
+
+        .btn-subscription {
+
+            background-color: var(--mirror-frame);
+
+            color: var(--magic-glow);
+
+            animation: pulse-border 2s infinite ease-in-out;
+
+        }
+
+        .btn-subscription:hover {
+
+            background-color: var(--action-purple);
+
+            box-shadow: 0 0 20px var(--action-purple);
+
+        }
+
+
+
+        /* Input Fields */
+
+        .magic-input {
+
+            background-color: rgba(0, 0, 0, 0.3);
+
+            border: 1px solid var(--mirror-frame);
+
+            color: var(--magic-glow);
+
+        }
+
+        .magic-input:focus {
+
+            outline: none;
+
+            border-color: var(--action-purple);
+
+            box-shadow: 0 0 8px var(--action-purple);
+
+        }
+
+
+
+        /* Radio buttons to reflect theme */
+
+        input[type="radio"]:checked {
+
+            border-color: var(--action-purple);
+
+            background-color: var(--action-purple);
+
+        }
+
+        input[type="radio"].form-radio {
+
+            color: var(--action-purple);
+
+        }
+
+
+
+        /* Animation for loading spinner */
+
+        .fa-spinner {
+
+            color: var(--action-purple);
+
+            filter: drop-shadow(0 0 5px var(--magic-glow));
+
+        }
+
+
+
+        @keyframes pulse-border {
+
+            0% { box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.4); }
+
+            70% { box-shadow: 0 0 0 10px rgba(147, 51, 234, 0); }
+
+            100% { box-shadow: 0 0 0 0 rgba(147, 51, 234, 0); }
+
+        }
+
+
+
+        /* Pink dust trail */
+
+        .sparkle-trail {
+
+            /* Renaming the class from '.dust' to '.sparkle-trail' to match the JS but keeping styles from '.dust' */
+
+            position: fixed;
+
+            width: 6px;
+
+            height: 6px;
+
+            background: radial-gradient(circle, var(--pink-dust-trail-color) 0%, transparent 70%);
+
+            border-radius: 50%;
+
+            pointer-events: none;
+
+            animation: fadeOut 1s ease-out forwards; /* Keeping the 1s fadeOut animation */
+
+            z-index: 10;
+
+            box-shadow: 0 0 8px var(--pink-dust-trail-color), 0 0 15px #ff66ff;
+
+        }
+
+
+
+        @keyframes fadeOut {
+
+            0% { opacity: 1; transform: scale(1); }
+
+            100% { opacity: 0; transform: scale(0.2); }
+
+        }
+
+        /* End of CSS additions */
+
+
+
+        /* --- NEW STYLES FOR TOOLTIP/FAIRY GUIDE --- */
+
+        .tooltip-container {
+
+            position: relative; /* Establish context for absolute tooltip */
+
+            display: inline-block;
+
+        }
+
+
+
+        .tooltip-text {
+
+            visibility: hidden;
+
+            width: 250px;
+
+            background-color: var(--mirror-frame);
+
+            color: var(--magic-glow);
+
+            text-align: center;
+
+            border-radius: 8px;
+
+            padding: 10px;
+
+            position: absolute;
+
+            z-index: 10;
+
+            bottom: 125%; /* Position above the label */
+
+            left: 50%;
+
+            margin-left: -125px; /* Center the tooltip */
+
+            opacity: 0;
+
+            transition: opacity 0.3s, transform 0.3s;
+
+            border: 1px solid var(--action-hover);
+
+            box-shadow: 0 0 10px var(--action-purple);
+
+            font-family: 'Cinzel', serif;
+
+            font-size: 0.875rem; /* text-sm */
+
+        }
+
+
+
+        /* Arrow/Tail for the tooltip */
+
+        .tooltip-text::after {
+
+            content: "";
+
+            position: absolute;
+
+            top: 100%; /* At the bottom of the tooltip */
+
+            left: 50%;
+
+            margin-left: -5px;
+
+            border-width: 5px;
+
+            border-style: solid;
+
+            border-color: var(--mirror-frame) transparent transparent transparent;
+
+        }
+
+
+
+        .tooltip-container:hover .tooltip-text {
+
+            visibility: visible;
+
+            opacity: 1;
+
+            transform: translateY(-5px); /* Subtle float animation */
+
+        }
+
+        /* ------------------------------------------- */
+
+
+        /* --- NEW STYLES FOR STEP INDICATOR --- */
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* semibold */
+            color: var(--magic-glow);
+            opacity: 0.5;
+            transition: opacity 0.5s ease, color 0.5s ease;
+            position: relative;
+        }
+
+        .step.active {
+            opacity: 1;
+            color: var(--action-purple);
+        }
+
+        .step-icon {
+            font-size: 1.5rem;
+            margin-right: 8px;
+        }
+
+        .step-line {
+            height: 2px;
+            width: 30px;
+            background-color: var(--mirror-frame);
+            margin: 0 10px;
+            transition: background-color 0.5s ease;
+        }
+
+        .step.active + .step-line {
+            background-color: var(--action-purple);
+        }
+        /* ------------------------------------------- */
+
     </style>
+
 </head>
-<body class="bg-gray-900 text-white min-h-screen p-4 sm:p-8">
 
-<header class="flex justify-between items-center mb-8 flex-wrap">
-    <h1 class="text-4xl font-bold text-purple-400">Virtual Stylist</h1>
-    <div class="flex space-x-4">
-        <a href="{{ url_for('userprofile_page') }}" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200">
-            <i class="fas fa-user-circle mr-2"></i>Profile
-        </a>
-        <a href="/logout" class="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors duration-200">
-            <i class="fas fa-sign-out-alt mr-2"></i>Logout
-        </a>
-    </div>
-</header>
+<body class="bg-[var(--dark-magical)] text-[var(--magic-glow)] min-h-screen p-4 sm:p-8">
 
-<main class="grid grid-cols-1 md:grid-cols-2 gap-8">
-    <section class="bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700">
-        <h2 class="text-2xl font-semibold text-gray-100 mb-4">Your Closet</h2>
-        <form id="addItemForm" class="flex items-center space-x-2 mb-6">
-            <input type="text" id="itemInput" placeholder="Add an item (e.g., blue jeans)" class="flex-1 px-4 py-2 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200" required>
-            <button type="submit" class="bg-purple-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-purple-700 transition-colors duration-200">Add</button>
-        </form>
-        <ul id="closetList" class="space-y-3">
-            {% if closet %}
-                {% for item in closet %}
-                    <li class="bg-gray-700 p-3 rounded-lg flex justify-between items-center text-gray-200">
-                        <span>{{ item }}</span>
-                        <button class="delete-item-btn text-red-400 hover:text-red-500 transition-colors duration-200" data-item="{{ item }}">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </li>
-                {% endfor %}
-            {% else %}
-                <li class="text-gray-400 text-center">Your closet is empty. Add some items to get started!</li>
-            {% endif %}
-        </ul>
-    </section>
 
-    <section class="bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700">
-        <h2 class="text-2xl font-semibold text-gray-100 mb-4">Get an Outfit</h2>
-        <form id="generateOutfitForm" class="space-y-4">
-            <div>
-                <label for="occasion" class="block text-gray-300 font-medium mb-1">Occasion</label>
-                <input type="text" id="occasion" placeholder="e.g., a casual date" class="w-full px-4 py-2 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200">
-            </div>
-            <div>
-                <label for="style" class="block text-gray-300 font-medium mb-1">Style Preference</label>
-                <input type="text" id="style" placeholder="e.g., boho chic" class="w-full px-4 py-2 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200">
-            </div>
-            <div>
-                <span class="block text-gray-300 font-medium mb-1">Recommendation Type</span>
-                <div class="flex items-center space-x-4 mt-2">
-                    <label class="inline-flex items-center">
-                        <input type="radio" name="recommendation_type" value="closet" class="form-radio text-purple-600 h-4 w-4" checked>
-                        <span class="ml-2 text-gray-300">Based on my closet</span>
-                    </label>
-                    <label class="inline-flex items-center">
-                        <input type="radio" name="recommendation_type" value="general" class="form-radio text-purple-600 h-4 w-4">
-                        <span class="ml-2 text-gray-300">General outfit idea</span>
-                    </label>
-                </div>
-            </div>
-            <div>
-                <span class="block text-gray-300 font-medium mb-1">Gender for Model</span>
-                <div class="flex items-center space-x-4 mt-2">
-                    <label class="inline-flex items-center">
-                        <input type="radio" name="gender" value="man" class="form-radio text-purple-600 h-4 w-4" checked>
-                        <span class="ml-2 text-gray-300">Male</span>
-                    </label>
-                    <label class="inline-flex items-center">
-                        <input type="radio" name="gender" value="woman" class="form-radio text-purple-600 h-4 w-4">
-                        <span class="ml-2 text-gray-300">Female</span>
-                    </label>
-                </div>
-            </div>
-            <div class="flex justify-center">
-                <button type="submit" class="bg-green-600 text-white font-semibold py-2 px-8 rounded-md hover:bg-green-700 transition-colors duration-200 transform hover:scale-105">
-                    Generate Outfit
-                </button>
-            </div>
-        </form>
 
-        <div id="outputContainer" class="mt-6 hidden">
-            <div id="loadingIndicator" class="text-center">
-                <i class="fas fa-spinner fa-spin text-4xl text-purple-500"></i>
-                <p class="mt-2 text-gray-400">Generating outfit recommendation...</p>
-            </div>
+    <div class="sparkle-layer" id="sparkleLayer"></div>
 
-            <div id="outfitResult" class="hidden">
-                <h3 class="text-xl font-semibold text-gray-100 mb-2">Outfit Recommendation:</h3>
-                <p id="recommendationText" class="text-gray-300 mb-4 whitespace-pre-line"></p>
 
-                <h4 class="text-lg font-semibold text-gray-100 mb-2">Shopping Links:</h4>
-                <ul id="shoppingLinks" class="list-disc list-inside text-gray-300 mb-4"></ul>
 
-                <h4 class="text-lg font-semibold text-gray-100 mb-2">Sources:</h4>
-                <ul id="sourcesList" class="list-disc list-inside text-gray-300 mb-4"></ul>
+    <header class="flex justify-between items-center mb-10 flex-wrap border-b border-[var(--mirror-frame)] pb-4">
 
-                <button id="tryAgainBtn" class="mt-4 bg-yellow-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-yellow-600 transition-colors duration-200">
-                    Try Again
-                </button>
-            </div>
+        <h1 class="text-5xl font-extrabold text-[var(--magic-glow)] tracking-wider">Virtual Stylist</h1>
+
+        <div class="flex space-x-4 mt-4 sm:mt-0">
+
+            <a href="{{ url_for('userprofile_page') }}" class="magic-btn btn-profile font-semibold py-2 px-6 rounded-full hover:shadow-lg">
+
+                <i class="fas fa-hat-wizard mr-2"></i>Profile
+
+            </a>
+
+            
+
+            <a href="/subscription" class="magic-btn btn-subscription font-semibold py-2 px-6 rounded-full hover:shadow-lg flex items-center">
+
+                <i class="fas fa-star mr-2"></i>Subscriptions
+
+            </a>
+
+
+
+            <a href="/logout" class="magic-btn btn-logout font-semibold py-2 px-6 rounded-full hover:shadow-lg">
+
+                <i class="fas fa-door-open mr-2"></i>Logout
+
+            </a>
+
         </div>
 
-        <div id="errorMessage" class="mt-6 text-red-400 text-center font-medium hidden"></div>
-    </section>
-</main>
+    </header>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const addItemForm = document.getElementById('addItemForm');
-    const generateOutfitForm = document.getElementById('generateOutfitForm');
-    const tryAgainBtn = document.getElementById('tryAgainBtn');
-    const closetList = document.getElementById('closetList');
-    const itemInput = document.getElementById('itemInput');
-    const outputContainer = document.getElementById('outputContainer');
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    const outfitResult = document.getElementById('outfitResult');
-    const recommendationText = document.getElementById('recommendationText');
-    const shoppingLinks = document.getElementById('shoppingLinks');
-    const sourcesList = document.getElementById('sourcesList');
-    const errorMessageDiv = document.getElementById('errorMessage');
 
-    let lastRecommendation = '';
 
-    function showMessage(message, isError = false) {
-        errorMessageDiv.textContent = message;
-        errorMessageDiv.classList.toggle('hidden', !message);
-        errorMessageDiv.classList.toggle('text-red-400', isError);
-        errorMessageDiv.classList.toggle('text-green-400', !isError);
-    }
+<main class="grid grid-cols-1 md:grid-cols-2 gap-10">
 
-    async function generateOutfit(dislikedOutfit = null) {
-        outfitResult.classList.add('hidden');
-        outputContainer.classList.remove('hidden');
-        loadingIndicator.classList.remove('hidden');
-        showMessage('');
 
-        const occasion = document.getElementById('occasion').value;
-        const style_preference = document.getElementById('style').value;
-        const gender = document.querySelector('input[name="gender"]:checked').value;
-        const recommendation_type = document.querySelector('input[name="recommendation_type"]:checked').value;
 
-        try {
-            const formData = new FormData();
-            formData.append('occasion', occasion);
-            formData.append('style_preference', style_preference);
-            formData.append('gender', gender);
-            formData.append('recommendation_type', recommendation_type);
-            if (dislikedOutfit) formData.append('disliked_outfit', dislikedOutfit);
+        <section class="magic-card p-8 rounded-3xl">
 
-            const response = await fetch('/generate-outfit', { method: 'POST', body: formData });
-            const result = await response.json();
+            <h2 class="text-3xl font-bold text-[var(--magic-glow)] mb-8 flex items-center">
 
-            loadingIndicator.classList.add('hidden');
+                <i class="fas fa-book-spells mr-3 text-[var(--action-purple)]"></i>Your Closet
 
-            if (response.ok) {
-                recommendationText.textContent = result.recommendation;
-                if (result.trends_considered && result.trends_considered.length > 0) {
-                    recommendationText.textContent += `\n\n(Trends considered: ${result.trends_considered.join(', ')})`;
-                }
+            </h2>
 
-                // Show shopping links
-                shoppingLinks.innerHTML = '';
-                if (result.shopping_links && result.shopping_links.length > 0) {
-                    result.shopping_links.forEach(link => {
-                        const li = document.createElement('li');
-                        li.innerHTML = `<a href="${link}" target="_blank" class="text-purple-400 hover:underline">${link}</a>`;
-                        shoppingLinks.appendChild(li);
-                    });
-                }
+            
 
-                // Show sources
-                sourcesList.innerHTML = '';
-                if (result.sources && result.sources.length > 0) {
-                    result.sources.forEach(source => {
-                        const li = document.createElement('li');
-                        li.textContent = source;
-                        sourcesList.appendChild(li);
-                    });
-                }
+            <div id="categoryGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-6">
 
-                lastRecommendation = result.recommendation;
-                outfitResult.classList.remove('hidden');
-            } else {
-                showMessage(result.message, true);
-            }
-        } catch (error) {
-            loadingIndicator.classList.add('hidden');
-            console.error('Error generating outfit:', error);
-            showMessage('Failed to generate an outfit due to a network error. Please try again.', true);
+                <a href="{{ url_for('closet_category_page', category='tops') }}" class="category-card p-6 rounded-xl text-center flex flex-col items-center justify-center">
+
+                    <span class="text-5xl mb-2 filter drop-shadow-lg">👚</span>
+
+                    <span class="text-lg font-medium text-[var(--magic-glow)]">Tops</span>
+
+                </a>
+
+                
+
+                <a href="{{ url_for('closet_category_page', category='bottoms') }}" class="category-card p-6 rounded-xl text-center flex flex-col items-center justify-center">
+
+                    <span class="text-5xl mb-2 filter drop-shadow-lg">👖</span>
+
+                    <span class="text-lg font-medium text-[var(--magic-glow)]">Bottoms</span>
+
+                </a>
+
+                
+
+                <a href="{{ url_for('closet_category_page', category='dresses') }}" class="category-card p-6 rounded-xl text-center flex flex-col items-center justify-center">
+
+                    <span class="text-5xl mb-2 filter drop-shadow-lg">👗</span>
+
+                    <span class="text-lg font-medium text-[var(--magic-glow)]">Dresses/Outfits</span>
+
+                </a>
+
+                
+
+                <a href="{{ url_for('closet_category_page', category='outerwear') }}" class="category-card p-6 rounded-xl text-center flex flex-col items-center justify-center">
+
+                    <span class="text-5xl mb-2 filter drop-shadow-lg">🧥</span>
+
+                    <span class="text-lg font-medium text-[var(--magic-glow)]">Outerwear/Jackets</span>
+
+                </a>
+
+                
+
+                <a href="{{ url_for('closet_category_page', category='shoes') }}" class="category-card p-6 rounded-xl text-center flex flex-col items-center justify-center">
+
+                    <span class="text-5xl mb-2 filter drop-shadow-lg">👟</span>
+
+                    <span class="text-lg font-medium text-[var(--magic-glow)]">Footwear</span>
+
+                </a>
+
+                
+
+                <a href="{{ url_for('closet_category_page', category='accessories') }}" class="category-card p-6 rounded-xl text-center flex flex-col items-center justify-center">
+
+                    <span class="text-5xl mb-2 filter drop-shadow-lg">💎</span>
+
+                    <span class="text-lg font-medium text-[var(--magic-glow)]">Accessories</span>
+
+                </a>
+
+
+
+            </div>
+
+            
+
+        </section>
+
+        
+
+        <section class="magic-card p-8 rounded-3xl">
+
+            <h2 class="text-3xl font-bold text-[var(--magic-glow)] mb-6 flex items-center">
+
+                <i class="fas fa-magic mr-3 text-[var(--action-purple)]"></i>Get an Outfit
+
+            </h2>
+
+            <form id="generateOutfitForm" class="space-y-6">
+
+                <div>
+
+                    <label for="occasion" class="block text-[var(--magic-glow)] font-semibold mb-2">Occasion</label>
+
+                    <input type="text" id="occasion" placeholder="e.g., a casual date" class="magic-input w-full px-4 py-3 rounded-lg focus:ring-4 focus:ring-[var(--action-purple)]" required>
+
+                </div>
+
+                <div>
+
+                    <label for="style" class="block text-[var(--magic-glow)] font-semibold mb-2">Style Preference</label>
+
+                    <input type="text" id="style" placeholder="e.g., boho chic" class="magic-input w-full px-4 py-3 rounded-lg focus:ring-4 focus:ring-[var(--action-purple)]" required>
+
+                </div>
+
+                <div>
+
+                    <span class="block text-[var(--magic-glow)] font-semibold mb-2">Recommendation Type</span>
+
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-6 mt-2">
+
+                        <div class="tooltip-container">
+
+                            <label class="inline-flex items-center cursor-pointer">
+
+                                <input type="radio" name="recommendation_type" value="closet" class="form-radio text-[var(--action-purple)] h-5 w-5" checked>
+
+                                <span class="ml-3 text-[var(--magic-glow)]">Based on my Closet</span>
+
+                            </label>
+
+                            <div class="tooltip-text">
+
+                                🧚‍♀️✨ Closet Magic: Generates an outfit using only the items you've added to your virtual wardrobe!
+
+                            </div>
+
+                        </div>
+
+                        
+
+                        <div class="tooltip-container">
+
+                            <label class="inline-flex items-center cursor-pointer">
+
+                                <input type="radio" name="recommendation_type" value="general" class="form-radio text-[var(--action-purple)] h-5 w-5">
+
+                                <span class="ml-3 text-[var(--magic-glow)]">A General Outfit Idea</span>
+
+                            </label>
+
+                            <div class="tooltip-text">
+
+                                🧚‍♀️✨ General Vision: Conjures a complete outfit concept (including new ideas) to inspire your style!
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="flex justify-center flex-wrap gap-4 pt-4">
+
+                    <button type="submit" class="magic-btn btn-generate font-semibold py-3 px-10 rounded-lg transform hover:scale-105">
+
+                        Generate Outfit <i class="fas fa-sparkles ml-2"></i>
+
+                    </button>
+
+                    </div>
+
+            </form>
+
+
+
+            <div id="outputContainer" class="mt-8 p-6 bg-black/30 rounded-xl border border-[var(--action-purple)] hidden">
+                <div id="loadingIndicator" class="text-center">
+                    <div class="step-indicator">
+                        <div id="step1" class="step">
+                            <i class="fas fa-search-dollar step-icon"></i><span class="hidden sm:inline">Trends</span>
+                        </div>
+                        <div class="step-line"></div>
+                        <div id="step2" class="step">
+                            <i class="fas fa-hat-wizard step-icon"></i><span class="hidden sm:inline">Stylist</span>
+                        </div>
+                        <div class="step-line"></div>
+                        <div id="step3" class="step">
+                            <i class="fas fa-star step-icon"></i><span class="hidden sm:inline">Preferences</span>
+                        </div>
+                        <div class="step-line"></div>
+                        <div id="step4" class="step">
+                            <i class="fas fa-shopping-bag step-icon"></i><span class="hidden sm:inline">Links</span>
+                        </div>
+                    </div>
+                    <i id="spinnerIcon" class="fas fa-spinner fa-spin text-5xl text-[var(--action-purple)]"></i>
+                    <p id="loadingMessage" class="mt-3 text-[var(--magic-glow)] font-medium">Initializing the process...</p>
+                </div>
+                <div id="outfitResult" class="hidden">
+
+                    <h3 class="text-2xl font-bold text-[var(--magic-glow)] mb-3 border-b border-[var(--mirror-frame)] pb-2">Outfit Recommendation:</h3>
+
+                    <p id="recommendationText" class="text-[var(--magic-glow)] mb-5 whitespace-pre-line"></p>
+
+                    <h4 class="text-xl font-bold text-[var(--magic-glow)] mb-3">Shopping Links:</h4>
+
+                    <ul id="shoppingLinks" class="list-disc list-inside text-[var(--magic-glow)] space-y-2 mb-4 pl-4"></ul>
+
+                    <button id="tryAgainBtn" class="magic-btn bg-yellow-600 text-[var(--dark-magical)] font-semibold py-2 px-6 rounded-lg hover:bg-yellow-500 transform hover:scale-105">
+
+                        <i class="fas fa-redo-alt mr-2"></i>Try Again
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <div id="errorMessage" class="mt-6 text-center font-bold hidden p-3 rounded-lg bg-red-900/40 border border-red-700"></div>
+
+        </section>
+
+
+
+    </main>
+
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const generateOutfitForm = document.getElementById('generateOutfitForm');
+        const tryAgainBtn = document.getElementById('tryAgainBtn');
+        const outputContainer = document.getElementById('outputContainer');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const stepElements = [
+            { id: 'step1', msg: '🧚‍♀️ Step 1: Researching current fashion trends...' },
+            { id: 'step2', msg: '✨ Step 2: Generating outfit ideas from your wardrobe items...' },
+            { id: 'step3', msg: '💖 Step 3: Aligning the outfit with your saved style preferences...' },
+            { id: 'step4', msg: '🛍️ Step 4: Finding shopping links for similar or recommended items...' }
+        ];
+        const stepIndicatorElements = stepElements.map(s => document.getElementById(s.id));
+
+        const outfitResult = document.getElementById('outfitResult');
+        const recommendationText = document.getElementById('recommendationText');
+        const shoppingLinks = document.getElementById('shoppingLinks');
+        const errorMessageDiv = document.getElementById('errorMessage');
+        const sparkleLayer = document.getElementById('sparkleLayer');
+
+        let lastRecommendation = '';
+        // Removed currentStepInterval as we will use sequential timeouts
+        let currentStepIndex = 0; // New variable to track current step
+
+        // 🌌 Floating sparkles background - Added JS from the second code block
+        for (let i = 0; i < 50; i++) {
+            const sparkle = document.createElement('div');
+            sparkle.classList.add('sparkle');
+            sparkle.style.left = Math.random() * 100 + 'vw';
+            sparkle.style.top = Math.random() * 100 + 'vh';
+            sparkle.style.animationDelay = Math.random() * 6 + 's';
+            sparkle.style.animationDuration = 4 + Math.random() * 4 + 's';
+            sparkleLayer.appendChild(sparkle);
         }
-    }
 
-    generateOutfitForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        generateOutfit();
-    });
+        // CUSTOM: Sparkle Generation Function (Mouse Trail)
+        function createSparkle(x, y) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle-trail';
+            sparkle.style.left = `${x}px`;
+            sparkle.style.top = `${y}px`;
+            document.body.appendChild(sparkle);
+            setTimeout(() => sparkle.remove(), 1000);
+        }
 
-    tryAgainBtn.addEventListener('click', function() {
-        if (lastRecommendation) generateOutfit(lastRecommendation);
-        else showMessage('Please generate an initial outfit first.', true);
+        // CUSTOM: Mousemove listener for sparkle trail
+        document.addEventListener('mousemove', (e) => {
+            createSparkle(e.pageX, e.pageY);
+        });
+
+
+        function showMessage(message, isError = false) {
+            errorMessageDiv.innerHTML = message;
+            errorMessageDiv.classList.toggle('hidden', !message);
+            errorMessageDiv.classList.toggle('bg-red-900/40', isError);
+            errorMessageDiv.classList.toggle('border-red-700', isError);
+            errorMessageDiv.classList.toggle('text-red-400', isError);
+            errorMessageDiv.classList.toggle('bg-green-900/40', !isError);
+            errorMessageDiv.classList.toggle('border-green-700', !isError);
+            errorMessageDiv.classList.toggle('text-green-400', !isError);
+        }
+
+        // NEW: Function to manually advance a single step
+        function advanceStep() {
+            if (currentStepIndex < stepElements.length) {
+                // Deactivate the previous step (if any)
+                if (currentStepIndex > 0) {
+                    stepIndicatorElements[currentStepIndex - 1].classList.remove('active');
+                }
+                
+                // Activate the current step
+                stepIndicatorElements[currentStepIndex].classList.add('active');
+                loadingMessage.innerHTML = stepElements[currentStepIndex].msg;
+                currentStepIndex++;
+            }
+        }
+
+        // NEW: Function to reset and start loading
+        function startLoading() {
+            currentStepIndex = 0;
+            // Reset all steps to inactive
+            stepIndicatorElements.forEach(el => el.classList.remove('active'));
+            // Start at step 0 (which will immediately advance to step 1 visuals)
+            advanceStep();
+        }
+
+        // NEW: Function to stop and hide loading
+        function stopLoading() {
+            loadingIndicator.classList.add('hidden');
+        }
+
+
+        async function generateOutfit(dislikedOutfit = null) {
+            // Hide previous results and clear error message
+            outfitResult.classList.add('hidden');
+            outputContainer.classList.remove('hidden');
+            loadingIndicator.classList.remove('hidden');
+            showMessage('');
+
+            // START INTERACTIVE LOADING
+            startLoading();
+
+            const occasion = document.getElementById('occasion').value;
+            const style_preference = document.getElementById('style').value;
+            const recommendation_type = document.querySelector('input[name="recommendation_type"]:checked').value;
+
+            // Define the steps and their simulated delays (in ms)
+            // This is where you control how long each step takes visually.
+            const stepDelays = [2000, 3000, 1500, 2500]; 
+            let totalDelay = 0;
+
+            // Helper to sequentially advance steps with simulated delay
+            const advanceStepsWithDelay = (index) => {
+                if (index < stepDelays.length) {
+                    totalDelay += stepDelays[index];
+                    setTimeout(() => {
+                        advanceStep();
+                        advanceStepsWithDelay(index + 1);
+                    }, stepDelays[index]);
+                }
+            };
+
+            // Start the visual progression
+            advanceStepsWithDelay(0);
+
+
+            try {
+                const formData = new FormData();
+                formData.append('occasion', occasion);
+                formData.append('style_preference', style_preference);
+                formData.append('recommendation_type', recommendation_type);
+                if (dislikedOutfit) formData.append('disliked_outfit', dislikedOutfit);
+
+                // Note: This fetch call assumes a working backend at '/generate-outfit'
+                const responsePromise = fetch('/generate-outfit', { method: 'POST', body: formData });
+
+                // We use a Promise.all with a slight buffer after the visual steps are complete.
+                // This ensures the visuals have finished *before* the result is displayed,
+                // even if the backend is very fast.
+                const minDisplayTimePromise = new Promise(resolve => 
+                    setTimeout(resolve, totalDelay)
+                );
+                
+                // Wait for BOTH the actual response AND the minimum visual delay
+                const [response] = await Promise.all([responsePromise, minDisplayTimePromise]);
+                
+                const result = await response.json();
+                
+                // STOP LOADING VISUALS
+                stopLoading();
+
+
+                if (response.ok) {
+                    recommendationText.textContent = result.recommendation_text;
+
+                    if (result.trends_considered && result.trends_considered.length > 0) {
+                        recommendationText.textContent += `\n\n(Trends considered: ${result.trends_considered.join(', ')})`;
+                    }
+
+                    shoppingLinks.innerHTML = '';
+                    if (result.shopping_links && result.shopping_links.length > 0) {
+                        result.shopping_links.forEach(link => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `<a href="${link}" target="_blank" class="text-[var(--action-hover)] hover:underline hover:text-[var(--magic-glow)]">${link}</a>`;
+                            shoppingLinks.appendChild(li);
+                        });
+                    }
+
+                    lastRecommendation = result.recommendation_text;
+                    outputContainer.classList.remove('hidden');
+                    outfitResult.classList.remove('hidden');
+                } else {
+                    outputContainer.classList.remove('hidden');
+                    showMessage(result.message || 'The Stylist is having trouble seeing past the clothes! Please try a fashion-related request.', true);
+                }
+            } catch (error) {
+                stopLoading(); // Stop on error too
+                console.error('Error generating outfit:', error);
+                showMessage('The connection failed. Please check your network and try again', true);
+            }
+        }
+
+
+        generateOutfitForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            generateOutfit();
+        });
+
+        tryAgainBtn.addEventListener('click', function() {
+            if (lastRecommendation) generateOutfit(lastRecommendation);
+            else showMessage('Please generate an initial outfit first.', true);
+        });
+
     });
-});
 </script>
 
 </body>
+
 </html>

@@ -19,9 +19,9 @@ class TrendAnalysisResponse(BaseModel):
     tools_used: list[str]
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",
+    model="gemini-2.0-flash",
     temperature=0.2,
-    google_api_key=os.getenv("GOOGLE_API_KEY"),
+    google_api_key=os.getenv("GEMINI_API_KEY")
 )
 
 parser = PydanticOutputParser(pydantic_object=TrendAnalysisResponse)

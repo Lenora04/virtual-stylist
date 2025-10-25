@@ -7,39 +7,168 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Custom Variables and Global Styles for the Magical Theme */
+        :root {
+            --dark-magical: #0a011a; /* Very dark, almost black purple */
+            --mirror-frame: #3f0071; /* Deep purple for borders/accents */
+            --magic-glow: #e9d5ff; /* Pale purple for text/highlights */
+            --action-purple: #9333ea; /* Bright purple for main actions */
+            --action-hover: #a855f7; /* Lighter purple on hover */
+            --success-green: #34d399; /* Standard green for success, slightly muted */
+            --error-red: #f87171; /* Standard red for errors */
+            --pink-dust-trail-color: #ffb6f9;
+        }
+        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a202c; /* Dark background */
+            background-color: var(--dark-magical);
+            color: var(--magic-glow);
+            min-height: 100vh;
+            /* Subtle background animation for a "live" magical feel */
+            background-image: radial-gradient(circle at center, rgba(147, 51, 234, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 60s linear infinite;
+            overflow-x: hidden;
+            position: relative;
+            /* CUSTOM: Makeup Brush Cursor */
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewport='0 0 100 100' style='fill:black;font-size:20px;'><text y='50%'>🖌️</text></svg>") 16 16, pointer;
+        }
+
+        @keyframes moveBackground {
+            from { background-position: 0 0; }
+            to { background-position: 500px 500px; }
+        }
+
+        /* Sparkle layer (subtle glowing dots floating around) - Essential for the background effect */
+        .sparkle-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #ff9ff3 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatSparkle 6s linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes floatSparkle {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) scale(0.3);
+                opacity: 0;
+            }
+        }
+
+        h1, h2 {
+            font-family: 'Cinzel', serif; /* Use a magical/elegant font for headings */
+            text-shadow: 0 0 5px rgba(233, 213, 255, 0.5); /* Subtle glow on titles */
+        }
+
+        /* Card Styles (Replaces bg-gray-800, p-8, rounded-2xl, shadow-xl, border, border-gray-700) */
+        .magic-card {
+            background-color: rgba(30, 0, 48, 0.8); /* Dark, transparent-ish purple for main sections */
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--mirror-frame);
+            box-shadow: 0 0 15px rgba(147, 51, 234, 0.5); /* Initial purple glow */
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Button base style */
+        .magic-btn {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Primary Button (Replaces bg-purple-600) */
+        .btn-register {
+            background-color: var(--action-purple);
+            color: var(--magic-glow);
+        }
+        .btn-register:hover {
+            background-color: var(--action-hover);
+            box-shadow: 0 0 10px var(--action-hover);
+            transform: scale(1.03); /* Slightly less dramatic hover than original */
+        }
+        
+        /* Input Fields */
+        .magic-input {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--mirror-frame);
+            color: var(--magic-glow);
+        }
+        .magic-input:focus {
+            outline: none;
+            border-color: var(--action-purple);
+            box-shadow: 0 0 8px var(--action-purple);
+        }
+
+        /* 💫 Pink dust trail (Mouse trail) */
+        .sparkle-trail {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, var(--pink-dust-trail-color) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fadeOut 1s ease-out forwards;
+            z-index: 10;
+            box-shadow: 0 0 8px var(--pink-dust-trail-color), 0 0 15px #ff66ff;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.2); }
         }
     </style>
 </head>
-<body class="bg-gray-900 flex items-center justify-center min-h-screen text-white">
-    <div class="bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-sm border border-gray-700">
-        <h1 class="text-3xl font-bold text-center text-gray-100 mb-6">Create an Account</h1>
+<body class="flex items-center justify-center min-h-screen">
+    <div class="sparkle-layer" id="sparkleLayer"></div>
+
+    <div class="magic-card p-8 rounded-2xl w-full max-w-sm">
+        <h1 class="text-3xl font-bold text-center text-[var(--magic-glow)] mb-6">Create an Account</h1>
         
         <form id="registerForm" class="space-y-4">
             <div>
-                <label for="email" class="block text-gray-300 font-medium mb-1">Email</label>
-                <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-600 rounded-md bg-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200" required>
+                <label for="email" class="block text-[var(--magic-glow)] font-medium mb-1">Email</label>
+                <input type="email" id="email" name="email" class="magic-input w-full px-4 py-2 rounded-md transition-colors duration-200" required>
             </div>
             <div>
-                <label for="password" class="block text-gray-300 font-medium mb-1">Password</label>
-                <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-600 rounded-md bg-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200" required>
+                <label for="password" class="block text-[var(--magic-glow)] font-medium mb-1">Password</label>
+                <input type="password" id="password" name="password" class="magic-input w-full px-4 py-2 rounded-md transition-colors duration-200" required>
             </div>
             <div>
-                <label for="confirm-password" class="block text-gray-300 font-medium mb-1">Confirm Password</label>
-                <input type="password" id="confirm-password" name="confirm-password" class="w-full px-4 py-2 border border-gray-600 rounded-md bg-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200" required>
+                <label for="confirm-password" class="block text-[var(--magic-glow)] font-medium mb-1">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm-password" class="magic-input w-full px-4 py-2 rounded-md transition-colors duration-200" required>
             </div>
-            <button type="submit" class="w-full bg-purple-600 text-white font-semibold py-2 rounded-md hover:bg-purple-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transform hover:scale-105">
+            <button type="submit" class="magic-btn btn-register w-full font-semibold py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--action-purple)] focus:ring-offset-2 transform hover:scale-105">
                 Register
             </button>
         </form>
         <div id="message" class="mt-4 text-center font-medium"></div>
-        <div class="mt-6 text-center text-sm text-gray-400">
+        <div class="mt-6 text-center text-sm text-[var(--magic-glow)]">
             Already have an account? 
-            <a href="/login" class="font-medium text-purple-400 hover:text-purple-300">
+            <a href="/login" class="font-medium text-[var(--action-hover)] hover:text-[var(--action-purple)]">
                 Log In
             </a>
         </div>
@@ -63,17 +192,44 @@
         
         async function initApp() {
             const firebaseConfig = await fetchFirebaseConfig();
+            const messageDiv = document.getElementById('message');
+
             if (!firebaseConfig) {
-                const messageDiv = document.getElementById('message');
                 messageDiv.textContent = 'Failed to load app configuration. Please try again later.';
-                messageDiv.className = 'mt-4 text-center font-medium text-red-400';
+                // Updated Tailwind class to use theme colors (text-red-400 is close to --error-red)
+                messageDiv.className = 'mt-4 text-center font-medium text-red-400'; 
                 return;
             }
             
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const registerForm = document.getElementById('registerForm');
-            const messageDiv = document.getElementById('message');
+
+            // --- Theme-related JS additions (Sparkles) ---
+            const sparkleLayer = document.getElementById('sparkleLayer');
+            for (let i = 0; i < 50; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.classList.add('sparkle');
+                sparkle.style.left = Math.random() * 100 + 'vw';
+                sparkle.style.top = Math.random() * 100 + 'vh';
+                sparkle.style.animationDelay = Math.random() * 6 + 's';
+                sparkle.style.animationDuration = 4 + Math.random() * 4 + 's';
+                sparkleLayer.appendChild(sparkle);
+            }
+
+            function createSparkle(x, y) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle-trail';
+                sparkle.style.left = `${x}px`;
+                sparkle.style.top = `${y}px`;
+                document.body.appendChild(sparkle);
+                setTimeout(() => sparkle.remove(), 1000);
+            }
+
+            document.addEventListener('mousemove', (e) => {
+                createSparkle(e.pageX, e.pageY);
+            });
+            // ---------------------------------------------
 
             registerForm.addEventListener('submit', async function(event) {
                 event.preventDefault();
@@ -83,10 +239,12 @@
                 const confirmPassword = registerForm.elements['confirm-password'].value;
                 
                 messageDiv.textContent = 'Registering...';
-                messageDiv.className = 'mt-4 text-center font-medium text-gray-400';
+                // Updated Tailwind class to use theme colors (text-gray-400 is close to --magic-glow)
+                messageDiv.className = 'mt-4 text-center font-medium text-[var(--magic-glow)]';
 
                 if (password !== confirmPassword) {
                     messageDiv.textContent = 'Passwords do not match.';
+                    // Updated Tailwind class to use theme colors (text-red-400 is close to --error-red)
                     messageDiv.className = 'mt-4 text-center font-medium text-red-400';
                     return;
                 }
@@ -95,6 +253,7 @@
                     await createUserWithEmailAndPassword(auth, email, password);
 
                     messageDiv.textContent = 'Registration successful! Redirecting to login...';
+                    // Updated Tailwind class to use theme colors (text-green-400 is close to --success-green)
                     messageDiv.className = 'mt-4 text-center font-medium text-green-400';
 
                     setTimeout(() => {
@@ -114,6 +273,7 @@
                         displayMessage = 'Network error. Please check your internet connection.';
                     }
                     messageDiv.textContent = displayMessage;
+                    // Updated Tailwind class to use theme colors (text-red-400 is close to --error-red)
                     messageDiv.className = 'mt-4 text-center font-medium text-red-400';
                 }
             });
