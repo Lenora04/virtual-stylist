@@ -70,7 +70,7 @@ blogs_tool = Tool(
 # ---------------------------
 # Shopping Site Search Tools
 # ---------------------------
-SHOPPING_SITES = ["https://www.temu.com/", "https://www.nolimit.lk/","https://mimosaforever.com/?srsltid=AfmBOop751_lo0po6pcgC0HFTbYfoCGixhzLfnh_WP7-eFE7ey1tGeVl","amazon.com"]
+SHOPPING_SITES = ["https://www.amazon.com/","https://coolplanet.lk/"]
 PRODUCT_KEYWORDS = ["shirt", "top", "dress", "jeans", "trousers", "jacket", "coat", "skirt", "sweater"]
 
 def shopping_site_search(query: str):

@@ -5,89 +5,420 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile - Virtual Stylist</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1a202c; 
+        /* Custom Variables and Global Styles for the Magical Theme */
+        :root {
+            --dark-magical: #0a011a; /* Very dark, almost black purple */
+            --mirror-frame: #3f0071; /* Deep purple for borders/accents */
+            --magic-glow: #e9d5ff; /* Pale purple for text/highlights */
+            --action-purple: #9333ea; /* Bright purple for main actions */
+            --action-hover: #a855f7; /* Lighter purple on hover */
+            --success-green: #34d399; /* Standard green for success, slightly muted */
+            --error-red: #f87171; /* Standard red for errors */
+            /* Matched pink dust from the second code block */
+            --pink-dust-trail-color: #ffb6f9;
         }
+        
+        body {
+            font-family: 'Inter', sans-serif; /* Keep Inter for readability */
+            background-color: var(--dark-magical);
+            color: var(--magic-glow);
+            min-height: 100vh;
+            /* Subtle background animation for a "live" magical feel */
+            background-image: radial-gradient(circle at center, rgba(147, 51, 234, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 60s linear infinite;
+            overflow-x: hidden; /* Added from the second style block */
+            position: relative; /* Added from the second style block */
+
+            /* CUSTOM: Makeup Brush Cursor */
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewport='0 0 100 100' style='fill:black;font-size:20px;'><text y='50%'>🖌️</text></svg>") 16 16, pointer; 
+        }
+
+        @keyframes moveBackground {
+            from { background-position: 0 0; }
+            to { background-position: 500px 500px; }
+        }
+        
+        /* Sparkle layer (subtle glowing dots floating around) */
+        .sparkle-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #ff9ff3 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatSparkle 6s linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes floatSparkle {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) scale(0.3);
+                opacity: 0;
+            }
+        }
+
+        h1, h2 {
+            font-family: 'Cinzel', serif; /* Use a magical/elegant font for headings */
+            text-shadow: 0 0 5px rgba(233, 213, 255, 0.5); /* Subtle glow on titles */
+        }
+
+        /* Card and Button Styles */
+        .magic-card {
+            background-color: rgba(30, 0, 48, 0.8); /* Dark, transparent-ish purple for main sections */
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--mirror-frame);
+            box-shadow: 0 0 15px rgba(147, 51, 234, 0.5); /* Initial purple glow */
+            transition: all 0.3s ease;
+            position: relative; /* Added from the second style block */
+            z-index: 2; /* Added from the second style block */
+        }
+        
+        /* Custom category card hover effect (not used on this page, but included for completeness) */
+        .category-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+            background-color: rgba(63, 0, 113, 0.7); /* Darker purple base */
+        }
+        .category-card:hover {
+            transform: scale(1.05); /* Slightly bigger on hover */
+            box-shadow: 0 0 25px var(--action-purple); /* Stronger purple glow on hover */
+            border-color: var(--magic-glow);
+            background-color: var(--mirror-frame);
+        }
+
+        /* Button base style */
+        .magic-btn {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative; /* Added from the second style block */
+            z-index: 2; /* Added from the second style block */
+        }
+        
+        /* Primary/Profile Button (Blue to Mystic Purple) */
+        .btn-profile {
+            background-color: var(--action-purple);
+            color: var(--magic-glow);
+        }
+        .btn-profile:hover {
+            background-color: var(--action-hover);
+            box-shadow: 0 0 10px var(--action-hover);
+        }
+
+        /* Logout Button (Red to Darker Magic Red) */
+        .btn-logout {
+            background-color: #991b1b; /* Darker red */
+            color: var(--magic-glow);
+        }
+        .btn-logout:hover {
+            background-color: #b91c1c;
+            box-shadow: 0 0 10px #b91c1c;
+        }
+
+        /* Generate Outfit Button (Green to Enchanted Green) - Used for Save on this page */
+        .btn-generate {
+            background-color: var(--success-green); 
+            color: var(--dark-magical); /* Dark text on bright button */
+        }
+        .btn-generate:hover {
+            background-color: #10b981; /* Slightly darker green */
+            box-shadow: 0 0 15px var(--success-green);
+        }
+
+        /* Subscription Button (Purple to Golder/Star Purple) (Not used on this page) */
+        .btn-subscription {
+            background-color: var(--mirror-frame); 
+            color: var(--magic-glow); 
+            animation: pulse-border 2s infinite ease-in-out;
+        }
+        .btn-subscription:hover {
+            background-color: var(--action-purple);
+            box-shadow: 0 0 20px var(--action-purple);
+        }
+
+        /* Input Fields */
+        .magic-input {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--mirror-frame);
+            color: var(--magic-glow);
+        }
+        .magic-input:focus {
+            outline: none;
+            border-color: var(--action-purple);
+            box-shadow: 0 0 8px var(--action-purple);
+        }
+
+        /* Radio buttons to reflect theme */
+        input[type="radio"]:checked {
+            border-color: var(--action-purple);
+            background-color: var(--action-purple);
+        }
+        /* Adjusted the radio class name to match the HTML's 'form-radio' style */
+        input[type="radio"].form-radio { 
+            color: var(--action-purple);
+            /* Overriding Tailwind's default check color logic for a cleaner look */
+            background-image: none !important; 
+            border-color: var(--mirror-frame) !important; 
+        }
+
+        /* Animation for loading spinner */
+        .fa-spinner {
+            color: var(--action-purple);
+            filter: drop-shadow(0 0 5px var(--magic-glow));
+        }
+
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(147, 51, 234, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(147, 51, 234, 0); }
+        }
+
+        /*  Pink dust trail */
+        .sparkle-trail {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, var(--pink-dust-trail-color) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fadeOut 1s ease-out forwards; 
+            z-index: 10;
+            box-shadow: 0 0 8px var(--pink-dust-trail-color), 0 0 15px #ff66ff;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.2); }
+        }
+        /* End of CSS additions */
+
+        /* --- NEW STYLES FOR TOOLTIP/FAIRY GUIDE (not strictly necessary but included) --- */
+        .tooltip-container {
+            position: relative; /* Establish context for absolute tooltip */
+            display: inline-block;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 250px;
+            background-color: var(--mirror-frame);
+            color: var(--magic-glow);
+            text-align: center;
+            border-radius: 8px;
+            padding: 10px;
+            position: absolute;
+            z-index: 10;
+            bottom: 125%; /* Position above the label */
+            left: 50%;
+            margin-left: -125px; /* Center the tooltip */
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            border: 1px solid var(--action-hover);
+            box-shadow: 0 0 10px var(--action-purple);
+            font-family: 'Cinzel', serif;
+            font-size: 0.875rem; /* text-sm */
+        }
+
+        /* Arrow/Tail for the tooltip */
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%; /* At the bottom of the tooltip */
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--mirror-frame) transparent transparent transparent;
+        }
+
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(-5px); /* Subtle float animation */
+        }
+        /* ------------------------------------------- */
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen p-4 sm:p-8">
 
-    <header class="flex justify-between items-center mb-8 flex-wrap">
-        <h1 class="text-4xl font-bold text-purple-400">User Profile</h1>
+<body class="bg-[var(--dark-magical)] text-[var(--magic-glow)] min-h-screen p-4 sm:p-8">
+
+    <div class="sparkle-layer" id="sparkleLayer"></div>
+
+    <header class="flex justify-between items-center mb-8 flex-wrap border-b border-[var(--mirror-frame)] pb-4">
+        <h1 class="text-4xl font-bold text-[var(--magic-glow)]">User Profile</h1>
         <div class="flex space-x-2">
-            <a href="/" class="bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors duration-200">
+            <a href="/" class="magic-btn btn-profile font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
                 <i class="fas fa-arrow-left mr-2"></i>Back
             </a>
-            <a href="/logout" class="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors duration-200">
+            <a href="/logout" class="magic-btn btn-logout font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
                 <i class="fas fa-sign-out-alt mr-2"></i>Logout
             </a>
         </div>
     </header>
 
-    <main class="max-w-2xl mx-auto bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700">
-        <h2 class="text-2xl font-semibold text-gray-100 mb-6">Your Preferences</h2>
+    <main class="max-w-2xl mx-auto magic-card p-6 rounded-2xl shadow-xl">
+        <h2 class="text-2xl font-semibold text-[var(--magic-glow)] mb-6">Your Body & Style Preferences</h2>
 
         <form id="userPreferencesForm" class="space-y-4">
-            <!-- Favorite Colors -->
+            
             <div>
-                <label for="favorite_colors" class="block text-gray-300 font-medium mb-1">Favorite Colors (comma separated)</label>
-                <input type="text" id="favorite_colors" placeholder="e.g., red, blue, green" class="w-full px-4 py-2 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200">
+                <span class="block text-[var(--magic-glow)] font-medium mb-1">Gender for Outfits</span>
+                <div class="flex items-center space-x-4 mt-2">
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="gender" value="man" id="gender_man" class="form-radio h-4 w-4">
+                        <span class="ml-2 text-[var(--magic-glow)]">Male</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="gender" value="woman" id="gender_woman" class="form-radio h-4 w-4">
+                        <span class="ml-2 text-[var(--magic-glow)]">Female</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="gender" value="person" id="gender_other" class="form-radio h-4 w-4">
+                        <span class="ml-2 text-[var(--magic-glow)]">Other/Unspecified</span>
+                    </label>
+                </div>
+            </div>
+            <div>
+                <label for="skin_color" class="block text-[var(--magic-glow)] font-medium mb-1">Skin Color</label>
+                <input type="text" id="skin_color" placeholder="e.g., light, medium, dark" class="magic-input w-full px-4 py-2 rounded-md transition-colors duration-200">
             </div>
 
-            <!-- Skin Color -->
             <div>
-                <label for="skin_color" class="block text-gray-300 font-medium mb-1">Skin Color</label>
-                <input type="text" id="skin_color" placeholder="e.g., light, medium, dark" class="w-full px-4 py-2 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200">
+                <label for="height" class="block text-[var(--magic-glow)] font-medium mb-1">Height (cm)</label>
+                <input type="number" id="height" placeholder="e.g., 170" class="magic-input w-full px-4 py-2 rounded-md transition-colors duration-200">
             </div>
 
-            <!-- Height -->
             <div>
-                <label for="height" class="block text-gray-300 font-medium mb-1">Height (cm)</label>
-                <input type="number" id="height" placeholder="e.g., 170" class="w-full px-4 py-2 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200">
+                <label for="age" class="block text-[var(--magic-glow)] font-medium mb-1">Age</label>
+                <input type="number" id="age" placeholder="e.g., 30" class="magic-input w-full px-4 py-2 rounded-md transition-colors duration-200">
             </div>
 
-            <!-- Weight -->
             <div>
-                <label for="weight" class="block text-gray-300 font-medium mb-1">Weight (kg)</label>
-                <input type="number" id="weight" placeholder="e.g., 60" class="w-full px-4 py-2 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200">
+                <label for="weight" class="block text-[var(--magic-glow)] font-medium mb-1">Weight (kg)</label>
+                <input type="number" id="weight" placeholder="e.g., 60" class="magic-input w-full px-4 py-2 rounded-md transition-colors duration-200">
+            </div>
+            
+            <div>
+                <label for="additional_notes" class="block text-[var(--magic-glow)] font-medium mb-1">Additional Style Notes (Likes, Dislikes, Fit Preferences)</label>
+                <textarea id="additional_notes" rows="6" placeholder="e.g., I hate bright yellow, prefer high-waisted pants, and love anything leather. I usually wear a casual or minimalist style." class="magic-input w-full px-4 py-2 rounded-md transition-colors duration-200"></textarea>
             </div>
 
-            <!-- Style -->
-            <div>
-                <label for="style" class="block text-gray-300 font-medium mb-1">Preferred Style</label>
-                <input type="text" id="style" placeholder="e.g., casual, boho chic" class="w-full px-4 py-2 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200">
-            </div>
-
-            <div class="flex justify-center">
-                <button type="submit" class="bg-green-600 text-white font-semibold py-2 px-8 rounded-md hover:bg-green-700 transition-colors duration-200 transform hover:scale-105">
-                    Save Preferences
+            <div class="flex justify-center pt-4">
+                <button type="submit" class="magic-btn btn-generate font-semibold py-2 px-8 rounded-md transform hover:scale-105">
+                    <i class="fas fa-save mr-2"></i>Save Preferences
                 </button>
             </div>
         </form>
 
-        <div id="statusMessage" class="mt-4 text-center text-green-400 hidden"></div>
+        <div id="statusMessage" class="mt-4 text-center text-[var(--success-green)] hidden"></div>
     </main>
 
     <script>
+        // Function to load existing preferences
+        async function loadPreferences() {
+            try {
+                const response = await fetch('/get_preferences');
+                if (response.ok) {
+                    const prefs = await response.json();
+                    
+                    // Only load the required fields
+                    document.getElementById('skin_color').value = prefs.skin_color || '';
+                    document.getElementById('height').value = prefs.height || '';
+                    document.getElementById('weight').value = prefs.weight || '';
+                    document.getElementById('age').value = prefs.age || '';
+                    document.getElementById('additional_notes').value = prefs.additional_notes || '';
+                    
+                    //  NEW: Load Gender Preference 
+                    const gender = prefs.gender || 'person'; // Default to 'person' if not set
+                    const genderRadio = document.querySelector(`input[name="gender"][value="${gender}"]`);
+                    if (genderRadio) {
+                        genderRadio.checked = true;
+                    }
+
+                } else if (response.status !== 401) {
+                    console.error('Failed to load preferences:', response.status);
+                }
+            } catch (err) {
+                console.error("Network error during load:", err);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            loadPreferences();
+
             const form = document.getElementById('userPreferencesForm');
             const statusMessage = document.getElementById('statusMessage');
+
+            // --- ADDED: Sparkle Trail JS from the second code block's script section ---
+            const sparkleLayer = document.getElementById('sparkleLayer'); 
+
+            //  Floating sparkles background 
+            for (let i = 0; i < 50; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.classList.add('sparkle');
+                sparkle.style.left = Math.random() * 100 + 'vw';
+                sparkle.style.top = Math.random() * 100 + 'vh';
+                sparkle.style.animationDelay = Math.random() * 6 + 's';
+                sparkle.style.animationDuration = 4 + Math.random() * 4 + 's';
+                sparkleLayer.appendChild(sparkle);
+            }
+
+            // CUSTOM: Sparkle Generation Function (Mouse Trail)
+            function createSparkle(x, y) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle-trail'; 
+                // Adjust position to center the sparkle on the cursor tip
+                sparkle.style.left = `${x}px`;
+                sparkle.style.top = `${y}px`;
+                document.body.appendChild(sparkle);
+
+                // Remove the sparkle element after its animation finishes
+                setTimeout(() => sparkle.remove(), 1000); 
+            }
+
+            // CUSTOM: Mousemove listener for sparkle trail
+            document.addEventListener('mousemove', (e) => {
+                createSparkle(e.pageX, e.pageY);
+            });
+            // --- END ADDED JS ---
+
 
             form.addEventListener('submit', async function(event) {
                 event.preventDefault();
                 statusMessage.classList.add('hidden');
 
+                // Collect the required fields
                 const preferences = {
-                    favorite_colors: document.getElementById('favorite_colors').value.split(',').map(c => c.trim()).filter(c => c),
                     skin_color: document.getElementById('skin_color').value.trim(),
                     height: document.getElementById('height').value,
                     weight: document.getElementById('weight').value,
-                    style: document.getElementById('style').value.trim()
+                    age: document.getElementById('age').value,
+                    additional_notes: document.getElementById('additional_notes').value.trim(),
+                    //  NEW: Collect Gender Preference 
+                    gender: document.querySelector('input[name="gender"]:checked')?.value || 'person'
                 };
-
+                
                 try {
                     const response = await fetch('/save_preferences', {
                         method: 'POST',
@@ -97,39 +428,24 @@
                     const result = await response.json();
 
                     if (response.ok) {
-                        statusMessage.textContent = "Preferences saved successfully!";
-                        statusMessage.classList.remove('hidden');
-                        statusMessage.classList.remove('text-red-400');
-                        statusMessage.classList.add('text-green-400');
+                        statusMessage.textContent = "Preferences saved successfully! ✨";
+                        statusMessage.classList.remove('hidden', 'text-red-400');
+                        // Use CSS variables for success color
+                        statusMessage.style.color = 'var(--success-green)'; 
                     } else {
-                        statusMessage.textContent = result.error || "Failed to save preferences.";
-                        statusMessage.classList.remove('hidden');
-                        statusMessage.classList.remove('text-green-400');
-                        statusMessage.classList.add('text-red-400');
+                        statusMessage.textContent = result.error || "Failed to save preferences. ⚠️";
+                        statusMessage.classList.remove('hidden', 'text-green-400');
+                        // Use CSS variables for error color
+                        statusMessage.style.color = 'var(--error-red)'; 
                     }
                 } catch (err) {
-                    statusMessage.textContent = "Network error. Please try again.";
-                    statusMessage.classList.remove('hidden');
-                    statusMessage.classList.remove('text-green-400');
-                    statusMessage.classList.add('text-red-400');
+                    statusMessage.textContent = "Network error. Please try again. 🚨";
+                    statusMessage.classList.remove('hidden', 'text-green-400');
+                    // Use CSS variables for error color
+                    statusMessage.style.color = 'var(--error-red)'; 
                 }
             });
         });
-
-
-
-        document.addEventListener('DOMContentLoaded', async function() {
-    const response = await fetch('/get_preferences');
-    if (response.ok) {
-        const prefs = await response.json();
-        document.getElementById('favorite_colors').value = (prefs.favorite_colors || []).join(', ');
-        document.getElementById('skin_color').value = prefs.skin_color || '';
-        document.getElementById('height').value = prefs.height || '';
-        document.getElementById('weight').value = prefs.weight || '';
-        document.getElementById('style').value = prefs.style || '';
-    }
-});
-
     </script>
 
 </body>
