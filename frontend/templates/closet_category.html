@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Stylist - {{ category.capitalize() }} Closet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom Variables and Global Styles for the Magical Theme */
+        :root {
+            --dark-magical: #0a011a; /* Very dark, almost black purple */
+            --mirror-frame: #3f0071; /* Deep purple for borders/accents */
+            --magic-glow: #e9d5ff; /* Pale purple for text/highlights */
+            --action-purple: #9333ea; /* Bright purple for main actions */
+            --action-hover: #a855f7; /* Lighter purple on hover */
+            --success-green: #34d399; /* Standard green for success, slightly muted */
+            --error-red: #f87171; /* Standard red for errors */
+            --pink-dust-trail-color: #ffb6f9; /* Matched pink dust */
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif; /* Keep Inter for readability */
+            background-color: var(--dark-magical);
+            color: var(--magic-glow);
+            min-height: 100vh;
+            /* Subtle background animation for a "live" magical feel */
+            background-image: radial-gradient(circle at center, rgba(147, 51, 234, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 60s linear infinite;
+            overflow-x: hidden;
+            position: relative;
+
+            /* CUSTOM: Makeup Brush Cursor */
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewport='0 0 100 100' style='fill:black;font-size:20px;'><text y='50%'>🖌️</text></svg>") 16 16, pointer; 
+        }
+
+        @keyframes moveBackground {
+            from { background-position: 0 0; }
+            to { background-position: 500px 500px; }
+        }
+        
+        /* Sparkle layer (subtle glowing dots floating around) */
+        .sparkle-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #ff9ff3 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatSparkle 6s linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes floatSparkle {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) scale(0.3);
+                opacity: 0;
+            }
+        }
+
+        h1, h2 {
+            font-family: 'Cinzel', serif; /* Use a magical/elegant font for headings */
+            text-shadow: 0 0 5px rgba(233, 213, 255, 0.5); /* Subtle glow on titles */
+        }
+
+        /* Card and Button Styles */
+        .magic-card {
+            background-color: rgba(30, 0, 48, 0.8); /* Dark, transparent-ish purple for main sections */
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--mirror-frame);
+            box-shadow: 0 0 15px rgba(147, 51, 234, 0.5); /* Initial purple glow */
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Button base style */
+        .magic-btn {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Back to Home Button (Gray to Darker Purple) */
+        .btn-secondary {
+            background-color: var(--mirror-frame); 
+            color: var(--magic-glow);
+        }
+        .btn-secondary:hover {
+            background-color: var(--action-purple);
+            box-shadow: 0 0 10px var(--action-purple);
+        }
+        
+        /* Profile Button (Blue to Mystic Purple) */
+        .btn-profile {
+            background-color: var(--action-purple);
+            color: var(--magic-glow);
+        }
+        .btn-profile:hover {
+            background-color: var(--action-hover);
+            box-shadow: 0 0 10px var(--action-hover);
+        }
+
+        /* Logout Button (Red to Darker Magic Red) */
+        .btn-logout {
+            background-color: #991b1b; /* Darker red */
+            color: var(--magic-glow);
+        }
+        .btn-logout:hover {
+            background-color: #b91c1c;
+            box-shadow: 0 0 10px #b91c1c;
+        }
+
+        /* Add Item Button (Purple to Enchanted Purple) */
+        .btn-add-item {
+            background-color: var(--action-purple); 
+            color: var(--magic-glow);
+        }
+        .btn-add-item:hover {
+            background-color: var(--action-hover);
+            box-shadow: 0 0 15px var(--action-hover);
+        }
+
+        /* Delete Button (Red) */
+        .btn-delete {
+            color: var(--error-red);
+        }
+        .btn-delete:hover {
+            color: #ff3333; /* Brighter red on hover */
+            text-shadow: 0 0 5px var(--error-red);
+        }
+
+        /* Item List background */
+        .item-list-entry {
+            background-color: rgba(63, 0, 113, 0.7); /* Darker purple base for list items */
+            transition: all 0.2s ease;
+        }
+        .item-list-entry:hover {
+            background-color: var(--mirror-frame);
+            box-shadow: 0 0 8px rgba(168, 85, 247, 0.4);
+        }
+
+        /* Input Fields */
+        .magic-input {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--mirror-frame);
+            color: var(--magic-glow);
+        }
+        .magic-input:focus {
+            outline: none;
+            border-color: var(--action-purple);
+            box-shadow: 0 0 8px var(--action-purple);
+        }
+        
+        /* Message Div Styles (Success/Error) */
+        .message-success {
+            background-color: rgba(52, 211, 153, 0.2);
+            border: 1px solid var(--success-green);
+            color: var(--success-green);
+        }
+        .message-error {
+            background-color: rgba(248, 113, 113, 0.2);
+            border: 1px solid var(--error-red);
+            color: var(--error-red);
+        }
+
+
+        /*  Pink dust trail */
+        .sparkle-trail {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, var(--pink-dust-trail-color) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fadeOut 1s ease-out forwards;
+            z-index: 10;
+            box-shadow: 0 0 8px var(--pink-dust-trail-color), 0 0 15px #ff66ff;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.2); }
+        }
+    </style>
+</head>
+<body class="bg-[var(--dark-magical)] text-[var(--magic-glow)] min-h-screen p-4 sm:p-8">
+
+    <div class="sparkle-layer" id="sparkleLayer"></div>
+
+    <header class="flex justify-between items-center mb-8 flex-wrap border-b border-[var(--mirror-frame)] pb-4">
+        <h1 class="text-4xl font-bold text-[var(--magic-glow)]">Virtual Stylist</h1>
+        <div class="flex space-x-4 mt-4 sm:mt-0">
+            <a href="{{ url_for('home') }}" class="magic-btn btn-secondary font-semibold py-2 px-4 rounded-full">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Home
+            </a>
+            <a href="{{ url_for('userprofile_page') }}" class="magic-btn btn-profile font-semibold py-2 px-4 rounded-full">
+                <i class="fas fa-hat-wizard mr-2"></i>Profile
+            </a>
+            <a href="/logout" class="magic-btn btn-logout font-semibold py-2 px-4 rounded-full">
+                <i class="fas fa-door-open mr-2"></i>Logout
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto">
+        <section class="magic-card p-6 rounded-3xl">
+            <h2 class="text-3xl font-bold text-[var(--magic-glow)] mb-6 flex items-center">
+                <span class="text-4xl mr-3 filter drop-shadow-lg">{{ emoji }}</span>{{ category.capitalize() }} Items
+            </h2>
+
+            <form id="addItemForm" data-category="{{ category }}" class="flex items-center space-x-2 mb-6">
+                <input type="text" id="itemInput" placeholder="Add a new {{ category }} item (e.g., silk blouse)" class="magic-input flex-1 px-4 py-2 rounded-lg focus:ring-4" required>
+                <button type="submit" class="magic-btn btn-add-item font-semibold py-2 px-4 rounded-lg transform hover:scale-105">Add Item</button>
+            </form>
+            
+            <div id="errorMessage" class="mt-4 mb-4 text-center font-medium hidden p-3 rounded-lg"></div>
+
+            <ul id="closetList" class="space-y-3">
+                {% if items %}
+                    {% for item in items %}
+                        <li class="item-list-entry p-3 rounded-lg flex justify-between items-center text-[var(--magic-glow)]" data-item="{{ item }}">
+                            <span>{{ item }}</span>
+                            <button class="delete-item-btn btn-delete transition-colors duration-200" data-item="{{ item }}" data-category="{{ category }}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li class="text-gray-400 text-center empty-closet-message">Your {{ category }} closet is empty. Add your first item!</li>
+                {% endif %}
+            </ul>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addItemForm = document.getElementById('addItemForm');
+            const closetList = document.getElementById('closetList');
+            const itemInput = document.getElementById('itemInput');
+            const errorMessageDiv = document.getElementById('errorMessage');
+            const currentCategory = addItemForm.dataset.category;
+            const sparkleLayer = document.getElementById('sparkleLayer'); 
+
+            //  Floating sparkles background 
+            for (let i = 0; i < 50; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.classList.add('sparkle');
+                sparkle.style.left = Math.random() * 100 + 'vw';
+                sparkle.style.top = Math.random() * 100 + 'vh';
+                sparkle.style.animationDelay = Math.random() * 6 + 's';
+                sparkle.style.animationDuration = 4 + Math.random() * 4 + 's';
+                sparkleLayer.appendChild(sparkle);
+            }
+
+            // CUSTOM: Sparkle Generation Function (Mouse Trail)
+            function createSparkle(x, y) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle-trail'; 
+                // Adjust position to center the sparkle
+                sparkle.style.left = `${x}px`;
+                sparkle.style.top = `${y}px`;
+                document.body.appendChild(sparkle);
+
+                // Remove the sparkle element after its animation finishes
+                setTimeout(() => sparkle.remove(), 1000); 
+            }
+
+            // CUSTOM: Mousemove listener for sparkle trail
+            document.addEventListener('mousemove', (e) => {
+                createSparkle(e.pageX, e.pageY);
+            });
+
+
+            function showMessage(message, isError = false) {
+                errorMessageDiv.textContent = message;
+                errorMessageDiv.classList.toggle('hidden', !message);
+                
+                // Update classes based on the new magical theme styles
+                errorMessageDiv.classList.toggle('message-error', isError);
+                errorMessageDiv.classList.toggle('message-success', !isError);
+
+                // Remove the old Tailwind classes to prevent conflict
+                errorMessageDiv.classList.remove('text-red-400', 'text-green-400');
+            }
+
+            // Add Item functionality
+            addItemForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                const item = itemInput.value.trim();
+                if (!item) {
+                    showMessage('Item cannot be empty.', true);
+                    return;
+                }
+                
+                const formData = new FormData();
+                formData.append('itemInput', item);
+                formData.append('category', currentCategory);
+
+                try {
+                    // Note: This fetch call assumes a working backend at '/add-item'
+                    const response = await fetch('/add-item', { method: 'POST', body: formData });
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        const li = document.createElement('li');
+                        // Use the new magical list item class
+                        li.className = 'item-list-entry p-3 rounded-lg flex justify-between items-center text-[var(--magic-glow)]';
+                        li.setAttribute('data-item', result.item);
+                        li.innerHTML = `<span>${result.item}</span>
+                                             <button class="delete-item-btn btn-delete transition-colors duration-200" data-item="${result.item}" data-category="${currentCategory}">
+                                                 <i class="fas fa-trash-alt"></i>
+                                             </button>`;
+                        
+                        const emptyClosetItem = closetList.querySelector('.empty-closet-message');
+                        if (emptyClosetItem) emptyClosetItem.remove();
+                        
+                        closetList.appendChild(li);
+                        itemInput.value = '';
+                        showMessage('Item added successfully.', false);
+                    } else {
+                        showMessage(result.message, true);
+                    }
+                } catch (error) {
+                    console.error('Error adding item:', error);
+                    showMessage('Failed to add item due to a network error. Please try again.', true);
+                }
+            });
+
+            // Delete Item functionality (Existing code uses event delegation)
+            closetList.addEventListener('click', async function(event) {
+                const deleteBtn = event.target.closest('.delete-item-btn');
+                if (!deleteBtn) return;
+
+                event.preventDefault();
+
+                const itemToDelete = deleteBtn.dataset.item;
+                const categoryToDelete = deleteBtn.dataset.category;
+
+                const formData = new FormData();
+                //  FIX: Corrected key from 'itemInput' to 'item' to match Flask route
+                formData.append('item', itemToDelete); 
+                formData.append('category', categoryToDelete);
+                
+                try {
+                    // Note: This fetch call assumes a working backend at '/delete-item'
+                    const response = await fetch('/delete-item', { method: 'POST', body: formData });
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        const listItem = deleteBtn.closest('li');
+                        listItem.remove();
+                        showMessage('Item removed from the closet.', false);
+
+                        if (closetList.children.length === 0) {
+                            const emptyLi = document.createElement('li');
+                            emptyLi.className = 'text-gray-400 text-center empty-closet-message';
+                            emptyLi.textContent = `Your ${categoryToDelete} closet is empty. Add your first item!`;
+                            closetList.appendChild(emptyLi);
+                        }
+                    } else {
+                        showMessage(result.message, true);
+                    }
+
+                } catch (error) {
+                    console.error('Error deleting item:', error);
+                    showMessage('Failed to remove item due to a network error.', true);
+                }
+            });
+            
+        });
+    </script>
+</body>
+</html>
