@@ -11,7 +11,7 @@ load_dotenv()
 # Firebase Initialization
 cred_path = os.environ.get(
     "FIREBASE_SERVICE_KEY_PATH",
-    "C:/Users/USER/Desktop/stuff/IRWA/virtual-stylist/virtual-stylist-52782-firebase-adminsdk.json"
+    "C:/Users/HP/Desktop/IRWA Project/virtual-stylist/virtual-stylist-52782-firebase-adminsdk-fbsvc-6881e2d02f.json"
 )
 cred = credentials.Certificate(cred_path)
 try:
