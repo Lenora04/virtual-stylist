@@ -68,8 +68,8 @@ virtual-stylist/
 │   │   ├── trendanalyzer.py            # Trend analysis agent
 │   │   ├── product_search_agent.py     # Shopping link search agent
 │   │   └── user_preference_agent.py    # User preference adjustment agent
-│   ├── app.py                           # Main Flask application (alternative entry point)
-│   ├── main.py                          # Primary Flask application entry point
+│   ├                          
+│   ├── main.py                          # Main Flask application entry point
 │   ├── extensions.py                    # Firebase initialization module
 │   ├── tools.py                         # LangChain tools for web search and scraping
 │   ├── recommendationAgent.py           # Legacy recommendation agent
