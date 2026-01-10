@@ -219,11 +219,6 @@ PORT=5000
    ```bash
    python main.py
    ```
-   
-   Or:
-   ```bash
-   python app.py
-   ```
 
 3. You should see output indicating the Flask server is running:
    ```
