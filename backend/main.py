@@ -29,11 +29,29 @@ DEFAULT_EMOJI = '✨'
 
 
 # ----------------- Firebase Initialization -----------------
-cred_path = os.environ.get("FIREBASE_SERVICE_KEY_PATH")
-if not cred_path or not os.path.exists(cred_path):
-    raise FileNotFoundError(f"Firebase JSON not found. Set FIREBASE_SERVICE_KEY_PATH in .env (tried {cred_path})")
+# cred_path = os.environ.get("FIREBASE_SERVICE_KEY_PATH")
+# if not cred_path or not os.path.exists(cred_path):
+#     raise FileNotFoundError(f"Firebase JSON not found. Set FIREBASE_SERVICE_KEY_PATH in .env (tried {cred_path})")
 
-cred = credentials.Certificate(cred_path)
+# cred = credentials.Certificate(cred_path)
+
+# try:
+#     app_firebase = firebase_admin.initialize_app(cred)
+# except ValueError:
+#     app_firebase = firebase_admin.get_app()
+
+# db = firestore.client(app=app_firebase)
+
+import os, json
+from firebase_admin import credentials, auth, firestore
+
+firebase_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON")
+
+if not firebase_json:
+    raise ValueError("FIREBASE_SERVICE_ACCOUNT_JSON not set in environment")
+
+cred_dict = json.loads(firebase_json)
+cred = credentials.Certificate(cred_dict)
 
 try:
     app_firebase = firebase_admin.initialize_app(cred)
@@ -41,6 +59,7 @@ except ValueError:
     app_firebase = firebase_admin.get_app()
 
 db = firestore.client(app=app_firebase)
+
 
 # ----------------- Flask Setup -----------------
 template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "templates"))
