@@ -12,7 +12,7 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 app = FastAPI(title="Recommendation Agent")
 
 # --- Helper: Call Gemini API ---
-def call_gemini_api(prompt, model_name="gemini-1.5-flash"):
+def call_gemini_api(prompt, model_name="gemma-3-4b-it"):
     api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent"
 
     headers = {"Content-Type": "application/json"}
