@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", google_api_key=GEMINI_API_KEY)
+llm = ChatGoogleGenerativeAI(model="gemma-3-4b-it", google_api_key=GEMINI_API_KEY)
 
 user_pref_bp = Blueprint("user_pref_bp", __name__)
 

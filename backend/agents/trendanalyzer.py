@@ -19,7 +19,7 @@ class TrendAnalysisResponse(BaseModel):
     tools_used: list[str]
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-2.0-flash",
+    model="gemma-3-4b-it",
     temperature=0.2,
     google_api_key=os.getenv("GEMINI_API_KEY")
 )
