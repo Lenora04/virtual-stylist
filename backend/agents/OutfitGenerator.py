@@ -27,7 +27,7 @@ def analyze_fashion_trends(query="current fashion trends"):
         return None
 
 
-def call_gemini_api(prompt, model_name="gemini-2.0-flash"):
+def call_gemini_api(prompt, model_name="gemma-3-4b-it"):
     """Calls the Gemini API with exponential backoff for error handling."""
     api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent"
     retries = 0
